@@ -2,29 +2,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const pricingData = [
   {
-    name: "Link One",
+    name: "Normal Relocate",
     lagosAbuja: "₦130,000",
     otherStates: "₦120,000",
-    description: "Standard direct posting service"
+    description: "This will be approved when the next batch stream is about leaving Camp"
   },
   {
-    name: "Link Two",
-    lagosAbuja: "₦100,000",
-    otherStates: "₦90,000",
-    description: "Alternative posting option"
-  },
-  {
-    name: "Medical",
-    price: "₦240,000",
-    description: "Medical personnel posting"
-  },
-  {
-    name: "Origin",
-    price: "₦250,000",
-    description: "State of origin posting",
-    note: "Terms and conditions apply"
+    name: "Express Relocate",
+    lagosAbuja: "₦230,000",
+    otherStates: "₦210,000",
+    description: "This usually takes 2-5 (working days)"
   }
 ];
+
+const paymentDetails = {
+  accountNumber: "6111931518",
+  bank: "Opay",
+  accountName: "Olusegun Raphael"
+};
 
 export const PricingTable = () => {
   return (
@@ -51,17 +46,12 @@ export const PricingTable = () => {
                 <tr key={index} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
                   <td className="py-4 px-4 font-medium text-foreground">
                     {service.name}
-                    {service.note && (
-                      <span className="block text-xs text-muted-foreground italic mt-1">
-                        *{service.note}
-                      </span>
-                    )}
                   </td>
                   <td className="text-center py-4 px-4 text-foreground font-semibold">
-                    {service.lagosAbuja || service.price || "-"}
+                    {service.lagosAbuja}
                   </td>
                   <td className="text-center py-4 px-4 text-foreground font-semibold">
-                    {service.otherStates || "-"}
+                    {service.otherStates}
                   </td>
                   <td className="py-4 px-4 text-sm text-muted-foreground">
                     {service.description}
@@ -70,6 +60,21 @@ export const PricingTable = () => {
               ))}
             </tbody>
           </table>
+        </div>
+        
+        <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-border">
+          <h3 className="font-semibold text-foreground mb-2">Payment Details</h3>
+          <div className="space-y-1 text-sm">
+            <p className="text-muted-foreground">
+              <span className="font-medium text-foreground">Account Number:</span> {paymentDetails.accountNumber}
+            </p>
+            <p className="text-muted-foreground">
+              <span className="font-medium text-foreground">Bank:</span> {paymentDetails.bank}
+            </p>
+            <p className="text-muted-foreground">
+              <span className="font-medium text-foreground">Account Name:</span> {paymentDetails.accountName}
+            </p>
+          </div>
         </div>
       </CardContent>
     </Card>
