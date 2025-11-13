@@ -145,15 +145,15 @@ export const SubmissionForm = () => {
   };
 
   return (
-    <Card className="w-full max-w-2xl shadow-lg border-border">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-foreground">NYSC Direct Posting Submission</CardTitle>
-        <CardDescription className="text-muted-foreground">
-          Fill in your details to submit your direct posting request
+    <Card className="w-full shadow-xl border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-2xl transition-shadow">
+      <CardHeader className="space-y-2 pb-6">
+        <CardTitle className="text-xl md:text-2xl font-bold text-foreground">NYSC Application Form</CardTitle>
+        <CardDescription className="text-sm md:text-base text-muted-foreground">
+          Fill in your details to submit your posting request
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 md:space-y-6">
           <div className="space-y-2">
             <Label htmlFor="serviceType" className="text-foreground font-medium">
               Service Type <span className="text-destructive">*</span>
@@ -313,12 +313,12 @@ export const SubmissionForm = () => {
             
             {calculatedAmount > 0 ? (
               <>
-                <div className="bg-primary/5 border-2 border-primary rounded-lg p-6 mb-6">
+                <div className="bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/30 rounded-xl p-4 md:p-6 mb-6 shadow-lg">
                   <div className="text-center mb-4">
-                    <p className="text-sm font-medium text-muted-foreground mb-2">
+                    <p className="text-xs md:text-sm font-medium text-muted-foreground mb-2">
                       Total Amount to Pay
                     </p>
-                    <p className="text-4xl font-bold text-primary">
+                    <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                       ₦{calculatedAmount.toLocaleString()}
                     </p>
                     {(serviceType === "link_one" || serviceType === "link_two" || 
@@ -333,22 +333,23 @@ export const SubmissionForm = () => {
                   </div>
                 </div>
 
-                <div className="bg-secondary/50 border border-border rounded-lg p-6 mb-6">
-                  <p className="text-sm font-semibold text-foreground mb-4">
+                <div className="bg-secondary/30 border border-border/50 rounded-xl p-4 md:p-6 mb-6 backdrop-blur-sm">
+                  <p className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                     Make payment to:
                   </p>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-sm font-medium text-muted-foreground">Bank:</span>
-                      <span className="text-base text-foreground font-semibold">Opay</span>
+                      <span className="text-xs md:text-sm font-medium text-muted-foreground">Bank:</span>
+                      <span className="text-sm md:text-base text-foreground font-semibold">Opay</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-border/50">
-                      <span className="text-sm font-medium text-muted-foreground">Account Number:</span>
-                      <span className="text-base text-foreground font-semibold">6111931518</span>
+                      <span className="text-xs md:text-sm font-medium text-muted-foreground">Account Number:</span>
+                      <span className="text-sm md:text-base text-foreground font-semibold">6111931518</span>
                     </div>
                     <div className="flex justify-between items-center py-2">
-                      <span className="text-sm font-medium text-muted-foreground">Account Name:</span>
-                      <span className="text-base text-foreground font-semibold">Olusegun Raphael</span>
+                      <span className="text-xs md:text-sm font-medium text-muted-foreground">Account Name:</span>
+                      <span className="text-sm md:text-base text-foreground font-semibold">Olusegun Raphael</span>
                     </div>
                   </div>
                 </div>
@@ -386,9 +387,14 @@ export const SubmissionForm = () => {
           <Button
             type="submit"
             disabled={isSubmitting || !paymentProof}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+            className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed py-5 md:py-6 text-sm md:text-base"
           >
-            {isSubmitting ? "Submitting..." : "Submit Application"}
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></span>
+                Submitting...
+              </span>
+            ) : "Submit Application →"}
           </Button>
         </form>
       </CardContent>
