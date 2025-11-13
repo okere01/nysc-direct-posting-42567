@@ -71,7 +71,7 @@ const Index = () => {
           <div className="max-w-2xl mx-auto text-center space-y-8">
             <div>
               <h2 className="text-4xl font-bold text-foreground mb-4">
-                Apply for NYSC Direct Posting
+                Apply for NYSC Direct Posting, PPA Posting, Relocation and More
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
                 Submit your application for NYSC direct posting with ease. Our secure platform ensures your information is handled professionally.
