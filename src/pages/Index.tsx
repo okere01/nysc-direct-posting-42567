@@ -155,10 +155,10 @@ const Index = () => {
             </div>
             
             <div className="grid lg:grid-cols-2 gap-6 md:gap-8 items-start">
-              <div className="order-2 lg:order-1 animate-fade-in">
+              <div className="animate-fade-in">
                 <PricingTable />
               </div>
-              <div className="order-1 lg:order-2 animate-slide-in-right">
+              <div className="animate-slide-in-right">
                 <SubmissionForm />
               </div>
             </div>
