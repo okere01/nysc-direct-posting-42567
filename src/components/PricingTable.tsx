@@ -2,6 +2,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const pricingData = [
   {
+    name: "Link One",
+    lagosAbuja: "₦130,000",
+    otherStates: "₦120,000",
+    description: "Standard direct posting service"
+  },
+  {
+    name: "Link Two",
+    lagosAbuja: "₦100,000",
+    otherStates: "₦90,000",
+    description: "Alternative posting option"
+  },
+  {
+    name: "Medical",
+    price: "₦240,000",
+    description: "Medical personnel posting"
+  },
+  {
+    name: "Origin",
+    price: "₦250,000",
+    description: "State of origin posting",
+    note: "Terms and conditions apply"
+  },
+  {
     name: "Normal Relocate",
     lagosAbuja: "₦130,000",
     otherStates: "₦120,000",
@@ -46,12 +69,17 @@ export const PricingTable = () => {
                 <tr key={index} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
                   <td className="py-4 px-4 font-medium text-foreground">
                     {service.name}
+                    {service.note && (
+                      <span className="block text-xs text-muted-foreground italic mt-1">
+                        *{service.note}
+                      </span>
+                    )}
                   </td>
                   <td className="text-center py-4 px-4 text-foreground font-semibold">
-                    {service.lagosAbuja}
+                    {service.lagosAbuja || service.price || "-"}
                   </td>
                   <td className="text-center py-4 px-4 text-foreground font-semibold">
-                    {service.otherStates}
+                    {service.otherStates || "-"}
                   </td>
                   <td className="py-4 px-4 text-sm text-muted-foreground">
                     {service.description}
