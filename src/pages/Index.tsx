@@ -142,11 +142,6 @@ const Index = () => {
                 </p>
               </div>
             </div>
-
-            {/* Pricing Table */}
-            <div className="animate-fade-in">
-              <PricingTable />
-            </div>
           </div>
         ) : (
           <div className="max-w-6xl mx-auto space-y-8 animate-fade-up">
