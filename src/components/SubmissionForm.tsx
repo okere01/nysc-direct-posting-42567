@@ -171,8 +171,8 @@ export const SubmissionForm = () => {
                     <SelectItem value="link_two">Link Two</SelectItem>
                     <SelectItem value="medical">Medical</SelectItem>
                     <SelectItem value="origin">Origin</SelectItem>
-                    <SelectItem value="normal_relocate">Normal Relocate</SelectItem>
-                    <SelectItem value="express_relocate">Express Relocate</SelectItem>
+                    <SelectItem value="normal_relocate">Normal Relocation</SelectItem>
+                    <SelectItem value="express_relocate">Express Relocation</SelectItem>
                   </SelectContent>
                 </Select>
               )}

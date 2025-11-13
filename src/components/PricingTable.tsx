@@ -25,13 +25,13 @@ const pricingData = [
     note: "Terms and conditions apply"
   },
   {
-    name: "Normal Relocate",
+    name: "Normal Relocation",
     lagosAbuja: "₦130,000",
     otherStates: "₦120,000",
     description: "This will be approved when the next batch stream is about leaving Camp"
   },
   {
-    name: "Express Relocate",
+    name: "Express Relocation",
     lagosAbuja: "₦230,000",
     otherStates: "₦210,000",
     description: "This usually takes 2-5 (working days)"
