@@ -313,12 +313,15 @@ export const SubmissionForm = () => {
             
             {calculatedAmount > 0 ? (
               <>
-                <div className="bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/30 rounded-xl p-4 md:p-6 mb-6 shadow-lg">
-                  <div className="text-center mb-4">
+                <div className="relative overflow-hidden bg-gradient-to-br from-green-500/10 via-emerald-500/5 to-green-600/10 border-2 border-green-400/50 rounded-xl p-4 md:p-6 mb-6 shadow-2xl shadow-green-500/30 backdrop-blur-sm animate-pulse-glow">
+                  {/* Animated shine overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-green-400/20 to-transparent animate-shine pointer-events-none"></div>
+                  
+                  <div className="relative text-center mb-4">
                     <p className="text-xs md:text-sm font-medium text-muted-foreground mb-2">
                       Total Amount to Pay
                     </p>
-                    <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                    <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-600 via-emerald-500 to-green-600 bg-clip-text text-transparent drop-shadow-lg">
                       ₦{calculatedAmount.toLocaleString()}
                     </p>
                     {(serviceType === "link_one" || serviceType === "link_two" || 

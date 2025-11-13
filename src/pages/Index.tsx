@@ -35,8 +35,12 @@ const Index = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 animate-fade-in min-w-0">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-primary via-primary to-primary/90 rounded-xl flex items-center justify-center shadow-md transition-transform hover:scale-105 flex-shrink-0">
-                <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden bg-white p-1 shadow-md transition-transform hover:scale-105">
+                <img 
+                  src="/nysc-logo.png" 
+                  alt="NYSC Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div className="min-w-0">
                 <h1 className="text-base sm:text-lg md:text-xl font-bold text-foreground tracking-tight truncate">NYSC Direct Posting</h1>
