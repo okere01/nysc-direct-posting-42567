@@ -220,6 +220,11 @@ const AdminPanel = () => {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
+  // Don't render anything for non-admins (they'll be redirected)
+  if (!isAdmin) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted p-8">
       <div className="max-w-7xl mx-auto">
