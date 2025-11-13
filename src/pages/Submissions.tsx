@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +28,6 @@ const Submissions = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAdmin, loading: roleLoading } = useUserRole();
 
   useEffect(() => {
     checkAuth();
@@ -93,11 +91,6 @@ const Submissions = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-foreground">My Submissions</h1>
           <div className="space-x-4">
-            {isAdmin && (
-              <Button onClick={() => navigate("/admin")} variant="outline">
-                Admin Panel
-              </Button>
-            )}
             <Button onClick={() => navigate("/support")} variant="outline">
               Contact Support
             </Button>
