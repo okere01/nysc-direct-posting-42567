@@ -256,9 +256,10 @@ const AdminPanel = () => {
                       <TableHead>Amount</TableHead>
                       <TableHead>State of Origin</TableHead>
                       <TableHead>State of Choice</TableHead>
-                      <TableHead>Payment</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Remarks</TableHead>
+                       <TableHead>Payment</TableHead>
+                       <TableHead>Proof</TableHead>
+                       <TableHead>Status</TableHead>
+                       <TableHead>Remarks</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
@@ -276,16 +277,30 @@ const AdminPanel = () => {
                         </TableCell>
                         <TableCell>{submission.state_of_origin}</TableCell>
                         <TableCell>{submission.state_of_choices}</TableCell>
-                        <TableCell>
-                          <Badge className={submission.payment_verified ? "bg-green-500" : "bg-yellow-500"}>
-                            {submission.payment_verified ? "Verified" : "Pending"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={getStatusColor(submission.status)}>
-                            {submission.status}
-                          </Badge>
-                        </TableCell>
+                         <TableCell>
+                           <Badge className={submission.payment_verified ? "bg-green-500" : "bg-yellow-500"}>
+                             {submission.payment_verified ? "Verified" : "Pending"}
+                           </Badge>
+                         </TableCell>
+                         <TableCell>
+                           {submission.payment_proof_url ? (
+                             <a 
+                               href={submission.payment_proof_url} 
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               className="text-primary hover:underline text-sm"
+                             >
+                               View
+                             </a>
+                           ) : (
+                             <span className="text-muted-foreground text-sm">No proof</span>
+                           )}
+                         </TableCell>
+                         <TableCell>
+                           <Badge className={getStatusColor(submission.status)}>
+                             {submission.status}
+                           </Badge>
+                         </TableCell>
                         <TableCell className="max-w-xs truncate">
                           {submission.remarks || "-"}
                         </TableCell>
@@ -356,6 +371,30 @@ const AdminPanel = () => {
                                     rows={3}
                                   />
                                 </div>
+
+                                {submission.payment_proof_url && (
+                                  <div className="space-y-2">
+                                    <Label>Payment Proof</Label>
+                                    <div className="border rounded-lg p-4 bg-muted">
+                                      <img 
+                                        src={submission.payment_proof_url} 
+                                        alt="Payment proof" 
+                                        className="max-w-full h-auto rounded-md"
+                                        onError={(e) => {
+                                          e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><text x="50%" y="50%" text-anchor="middle" dy=".3em">Unable to load image</text></svg>';
+                                        }}
+                                      />
+                                      <a 
+                                        href={submission.payment_proof_url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-sm text-primary hover:underline mt-2 inline-block"
+                                      >
+                                        Open in new tab
+                                      </a>
+                                    </div>
+                                  </div>
+                                )}
 
                                 <Button onClick={handleUpdateSubmission} className="w-full">
                                   Update Submission
