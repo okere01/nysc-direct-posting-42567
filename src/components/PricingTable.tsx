@@ -40,28 +40,28 @@ const pricingData = [
 
 export const PricingTable = () => {
   return (
-    <Card className="w-full max-w-4xl mx-auto mb-8 shadow-lg border-border">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-foreground">Service Pricing</CardTitle>
-        <CardDescription className="text-muted-foreground">
+    <Card className="w-full mx-auto shadow-xl border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-2xl transition-shadow">
+      <CardHeader className="space-y-2 pb-6">
+        <CardTitle className="text-2xl md:text-3xl font-bold text-foreground">Service Pricing</CardTitle>
+        <CardDescription className="text-sm md:text-base text-muted-foreground">
           Choose the service that best fits your needs
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+        <div className="overflow-x-auto -mx-2 px-2">
+          <table className="w-full border-collapse min-w-[600px]">
             <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-4 px-4 font-semibold text-foreground">Service Type</th>
-                <th className="text-center py-4 px-4 font-semibold text-foreground">Lagos/Abuja</th>
-                <th className="text-center py-4 px-4 font-semibold text-foreground">Other States</th>
-                <th className="text-left py-4 px-4 font-semibold text-foreground">Description</th>
+              <tr className="border-b-2 border-border">
+                <th className="text-left py-4 px-3 md:px-4 font-semibold text-sm md:text-base text-foreground">Service Type</th>
+                <th className="text-center py-4 px-3 md:px-4 font-semibold text-sm md:text-base text-foreground">Lagos/Abuja</th>
+                <th className="text-center py-4 px-3 md:px-4 font-semibold text-sm md:text-base text-foreground">Other States</th>
+                <th className="text-left py-4 px-3 md:px-4 font-semibold text-sm md:text-base text-foreground">Description</th>
               </tr>
             </thead>
             <tbody>
               {pricingData.map((service, index) => (
-                <tr key={index} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
-                  <td className="py-4 px-4 font-medium text-foreground">
+                <tr key={index} className="border-b border-border/40 hover:bg-primary/5 transition-colors group">
+                  <td className="py-4 px-3 md:px-4 font-medium text-sm md:text-base text-foreground">
                     {service.name}
                     {service.note && (
                       <span className="block text-xs text-muted-foreground italic mt-1">
@@ -69,13 +69,13 @@ export const PricingTable = () => {
                       </span>
                     )}
                   </td>
-                  <td className="text-center py-4 px-4 text-foreground font-semibold">
+                  <td className="text-center py-4 px-3 md:px-4 text-sm md:text-base text-primary font-bold">
                     {service.lagosAbuja || service.price || "-"}
                   </td>
-                  <td className="text-center py-4 px-4 text-foreground font-semibold">
+                  <td className="text-center py-4 px-3 md:px-4 text-sm md:text-base text-primary font-bold">
                     {service.otherStates || "-"}
                   </td>
-                  <td className="py-4 px-4 text-sm text-muted-foreground">
+                  <td className="py-4 px-3 md:px-4 text-xs md:text-sm text-muted-foreground">
                     {service.description}
                   </td>
                 </tr>
