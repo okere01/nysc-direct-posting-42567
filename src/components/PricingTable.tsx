@@ -38,12 +38,6 @@ const pricingData = [
   }
 ];
 
-const paymentDetails = {
-  accountNumber: "6111931518",
-  bank: "Opay",
-  accountName: "Olusegun Raphael"
-};
-
 export const PricingTable = () => {
   return (
     <Card className="w-full max-w-4xl mx-auto mb-8 shadow-lg border-border">
@@ -88,21 +82,6 @@ export const PricingTable = () => {
               ))}
             </tbody>
           </table>
-        </div>
-        
-        <div className="mt-6 p-4 bg-muted/50 rounded-lg border border-border">
-          <h3 className="font-semibold text-foreground mb-2">Payment Details</h3>
-          <div className="space-y-1 text-sm">
-            <p className="text-muted-foreground">
-              <span className="font-medium text-foreground">Account Number:</span> {paymentDetails.accountNumber}
-            </p>
-            <p className="text-muted-foreground">
-              <span className="font-medium text-foreground">Bank:</span> {paymentDetails.bank}
-            </p>
-            <p className="text-muted-foreground">
-              <span className="font-medium text-foreground">Account Name:</span> {paymentDetails.accountName}
-            </p>
-          </div>
         </div>
       </CardContent>
     </Card>

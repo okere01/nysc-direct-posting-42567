@@ -17,7 +17,8 @@ const formSchema = z.object({
   callUp: z.string().min(2, "Call up number is required").max(50),
   stateOfOrigin: z.string().min(2, "State of origin is required").max(50),
   stateOfChoices: z.string().min(2, "State of choices is required").max(200),
-  serviceType: z.enum(["link_one", "link_two", "medical", "origin"], {
+  stateCode: z.string().optional(),
+  serviceType: z.enum(["link_one", "link_two", "medical", "origin", "normal_relocate", "express_relocate"], {
     required_error: "Please select a service type",
   }),
   nyscEmail: z.string().email("Invalid email").optional().or(z.literal("")),
@@ -62,6 +63,10 @@ export const SubmissionForm = () => {
       amount = 240000;
     } else if (serviceType === "origin") {
       amount = 250000;
+    } else if (serviceType === "normal_relocate") {
+      amount = isLagosOrAbuja ? 130000 : 120000;
+    } else if (serviceType === "express_relocate") {
+      amount = isLagosOrAbuja ? 230000 : 210000;
     }
 
     setCalculatedAmount(amount);
@@ -166,6 +171,8 @@ export const SubmissionForm = () => {
                     <SelectItem value="link_two">Link Two</SelectItem>
                     <SelectItem value="medical">Medical</SelectItem>
                     <SelectItem value="origin">Origin</SelectItem>
+                    <SelectItem value="normal_relocate">Normal Relocate</SelectItem>
+                    <SelectItem value="express_relocate">Express Relocate</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -250,6 +257,18 @@ export const SubmissionForm = () => {
             )}
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="stateCode" className="text-foreground font-medium">
+              State Code
+            </Label>
+            <Input
+              id="stateCode"
+              {...register("stateCode")}
+              placeholder="Enter state code (optional)"
+              className="border-input bg-background"
+            />
+          </div>
+
           <div className="border-t border-border pt-6">
             <h3 className="text-sm font-medium text-muted-foreground mb-4">
               Login Details (Optional)
@@ -302,7 +321,8 @@ export const SubmissionForm = () => {
                     <p className="text-4xl font-bold text-primary">
                       ₦{calculatedAmount.toLocaleString()}
                     </p>
-                    {(serviceType === "link_one" || serviceType === "link_two") && (
+                    {(serviceType === "link_one" || serviceType === "link_two" || 
+                      serviceType === "normal_relocate" || serviceType === "express_relocate") && (
                       <p className="text-xs text-muted-foreground mt-2">
                         {stateOfChoices?.toLowerCase().includes("lagos") || 
                          stateOfChoices?.toLowerCase().includes("abuja")
@@ -324,7 +344,7 @@ export const SubmissionForm = () => {
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-border/50">
                       <span className="text-sm font-medium text-muted-foreground">Account Number:</span>
-                      <span className="text-base text-foreground font-semibold">8033577433</span>
+                      <span className="text-base text-foreground font-semibold">6111931518</span>
                     </div>
                     <div className="flex justify-between items-center py-2">
                       <span className="text-sm font-medium text-muted-foreground">Account Name:</span>
