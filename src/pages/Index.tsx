@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { SubmissionForm } from "@/components/SubmissionForm";
 import { PricingTable } from "@/components/PricingTable";
 import { Shield, CheckCircle, Clock } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -182,8 +183,29 @@ const Index = () => {
                 Complete the form below with accurate information. Review our pricing table before proceeding.
               </p>
             </div>
-            
-            <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 items-start">
+
+            {/* Mobile: Tabs to reduce clutter */}
+            <div className="md:hidden">
+              <Tabs defaultValue="pricing" className="w-full">
+                <TabsList className="grid grid-cols-2 w-full rounded-xl">
+                  <TabsTrigger value="pricing">Pricing</TabsTrigger>
+                  <TabsTrigger value="apply">Apply</TabsTrigger>
+                </TabsList>
+                <TabsContent value="pricing" className="mt-4">
+                  <div className="animate-fade-in">
+                    <PricingTable />
+                  </div>
+                </TabsContent>
+                <TabsContent value="apply" className="mt-4">
+                  <div className="animate-slide-in-right">
+                    <SubmissionForm />
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            {/* Desktop / Tablet: side-by-side layout */}
+            <div className="hidden md:grid md:grid-cols-2 gap-6 sm:gap-8 items-start">
               <div className="animate-fade-in">
                 <PricingTable />
               </div>
