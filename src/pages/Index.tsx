@@ -208,8 +208,8 @@ const Index = () => {
               </Tabs>
             </div>
 
-            {/* Desktop / Tablet: side-by-side layout */}
-            <div className="hidden md:grid md:grid-cols-2 gap-6 sm:gap-8 items-start">
+            {/* Desktop / Tablet: vertical layout with pricing on top */}
+            <div className="hidden md:block space-y-6 sm:space-y-8">
               <div className="animate-fade-in">
                 <PricingTable />
               </div>
