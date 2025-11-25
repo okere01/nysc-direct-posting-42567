@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -322,12 +322,14 @@ const AdminPanel = () => {
                                 Edit
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
-                              <DialogHeader className="flex-shrink-0">
+                            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
                                 <DialogTitle>Update Submission - {submission.name}</DialogTitle>
+                                <DialogDescription className="sr-only">
+                                  Update NYSC submission status, payment verification, and admin notes.
+                                </DialogDescription>
                               </DialogHeader>
-                              <ScrollArea className="flex-1 pr-4">
-                                <div className="space-y-4 py-4">
+                              <div className="space-y-4 py-4">
                                 <div className="space-y-2">
                                   <Label htmlFor="status">Status</Label>
                                   <Select value={status} onValueChange={setStatus}>
@@ -405,11 +407,10 @@ const AdminPanel = () => {
                                   </div>
                                 )}
 
-                                  <Button onClick={handleUpdateSubmission} className="w-full">
-                                    Update Submission
-                                  </Button>
-                                </div>
-                              </ScrollArea>
+                                <Button onClick={handleUpdateSubmission} className="w-full">
+                                  Update Submission
+                                </Button>
+                              </div>
                             </DialogContent>
                           </Dialog>
                         </TableCell>
@@ -465,12 +466,14 @@ const AdminPanel = () => {
                                 Respond
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
-                              <DialogHeader className="flex-shrink-0">
+                            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
                                 <DialogTitle>Respond to Message</DialogTitle>
+                                <DialogDescription className="sr-only">
+                                  Review the user support message and add an admin response with updated status.
+                                </DialogDescription>
                               </DialogHeader>
-                              <ScrollArea className="flex-1 pr-4">
-                                <div className="space-y-4 py-4">
+                              <div className="space-y-4 py-4">
                                 <div className="space-y-2">
                                   <Label>Subject</Label>
                                   <p className="text-sm font-semibold">{msg.subject}</p>
@@ -507,11 +510,10 @@ const AdminPanel = () => {
                                   />
                                 </div>
 
-                                  <Button onClick={handleUpdateMessage} className="w-full">
-                                    Send Response
-                                  </Button>
-                                </div>
-                              </ScrollArea>
+                                <Button onClick={handleUpdateMessage} className="w-full">
+                                  Send Response
+                                </Button>
+                              </div>
                             </DialogContent>
                           </Dialog>
                         </TableCell>
