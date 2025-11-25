@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Submission {
   id: string;
@@ -226,33 +227,35 @@ const AdminPanel = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted p-8">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground">Admin Panel</h1>
-          <div className="space-x-4">
-            <Button onClick={() => navigate("/submissions")} variant="outline">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">Admin Panel</h1>
+          <div className="flex flex-wrap gap-2 sm:gap-4">
+            <Button onClick={() => navigate("/submissions")} variant="outline" size="sm" className="sm:size-default">
               My Submissions
             </Button>
-            <Button onClick={handleLogout} variant="destructive">
+            <Button onClick={handleLogout} variant="destructive" size="sm" className="sm:size-default">
               Logout
             </Button>
           </div>
         </div>
 
         <Tabs defaultValue="submissions" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="submissions">NYSC Submissions</TabsTrigger>
-            <TabsTrigger value="support">Support Messages</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-4 md:mb-6">
+            <TabsTrigger value="submissions" className="text-xs sm:text-sm">NYSC Submissions</TabsTrigger>
+            <TabsTrigger value="support" className="text-xs sm:text-sm">Support Messages</TabsTrigger>
           </TabsList>
 
           <TabsContent value="submissions">
             <Card>
-              <CardHeader>
-                <CardTitle>All NYSC Submissions</CardTitle>
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="text-lg md:text-xl">All NYSC Submissions</CardTitle>
               </CardHeader>
-              <CardContent>
-                <Table>
+              <CardContent className="p-0 md:p-6">
+                <ScrollArea className="w-full">
+                  <div className="min-w-[1200px]">
+                    <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
@@ -412,17 +415,21 @@ const AdminPanel = () => {
                     ))}
                   </TableBody>
                 </Table>
+                  </div>
+                </ScrollArea>
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="support">
             <Card>
-              <CardHeader>
-                <CardTitle>Support Messages</CardTitle>
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="text-lg md:text-xl">Support Messages</CardTitle>
               </CardHeader>
-              <CardContent>
-                <Table>
+              <CardContent className="p-0 md:p-6">
+                <ScrollArea className="w-full">
+                  <div className="min-w-[900px]">
+                    <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Subject</TableHead>
@@ -508,6 +515,8 @@ const AdminPanel = () => {
                     ))}
                   </TableBody>
                 </Table>
+                  </div>
+                </ScrollArea>
               </CardContent>
             </Card>
           </TabsContent>
