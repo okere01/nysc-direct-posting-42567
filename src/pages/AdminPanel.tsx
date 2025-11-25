@@ -322,11 +322,12 @@ const AdminPanel = () => {
                                 Edit
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
+                            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+                              <DialogHeader className="flex-shrink-0">
                                 <DialogTitle>Update Submission - {submission.name}</DialogTitle>
                               </DialogHeader>
-                              <div className="space-y-4 py-4">
+                              <ScrollArea className="flex-1 pr-4">
+                                <div className="space-y-4 py-4">
                                 <div className="space-y-2">
                                   <Label htmlFor="status">Status</Label>
                                   <Select value={status} onValueChange={setStatus}>
@@ -404,10 +405,11 @@ const AdminPanel = () => {
                                   </div>
                                 )}
 
-                                <Button onClick={handleUpdateSubmission} className="w-full">
-                                  Update Submission
-                                </Button>
-                              </div>
+                                  <Button onClick={handleUpdateSubmission} className="w-full">
+                                    Update Submission
+                                  </Button>
+                                </div>
+                              </ScrollArea>
                             </DialogContent>
                           </Dialog>
                         </TableCell>
@@ -463,11 +465,12 @@ const AdminPanel = () => {
                                 Respond
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
+                            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+                              <DialogHeader className="flex-shrink-0">
                                 <DialogTitle>Respond to Message</DialogTitle>
                               </DialogHeader>
-                              <div className="space-y-4 py-4">
+                              <ScrollArea className="flex-1 pr-4">
+                                <div className="space-y-4 py-4">
                                 <div className="space-y-2">
                                   <Label>Subject</Label>
                                   <p className="text-sm font-semibold">{msg.subject}</p>
@@ -504,10 +507,11 @@ const AdminPanel = () => {
                                   />
                                 </div>
 
-                                <Button onClick={handleUpdateMessage} className="w-full">
-                                  Send Response
-                                </Button>
-                              </div>
+                                  <Button onClick={handleUpdateMessage} className="w-full">
+                                    Send Response
+                                  </Button>
+                                </div>
+                              </ScrollArea>
                             </DialogContent>
                           </Dialog>
                         </TableCell>
