@@ -15,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Bell, MessageCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useUserNotifications } from "@/hooks/useUserNotifications";
 
 const messageSchema = z.object({
   subject: z.string().trim().min(3, "Subject must be at least 3 characters").max(200, "Subject too long"),
@@ -38,6 +39,7 @@ const Support = () => {
   const [replyText, setReplyText] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { notifications } = useUserNotifications();
 
   const form = useForm<z.infer<typeof messageSchema>>({
     resolver: zodResolver(messageSchema),
@@ -190,8 +192,20 @@ const Support = () => {
             )}
           </div>
           <div className="space-x-4">
-            <Button onClick={() => navigate("/submissions")} variant="outline">
+            <Button 
+              onClick={() => navigate("/submissions")} 
+              variant="outline"
+              className="relative"
+            >
               My Submissions
+              {(notifications.pendingSubmissions > 0 || notifications.unverifiedPayments > 0) && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse"
+                >
+                  {notifications.pendingSubmissions + notifications.unverifiedPayments}
+                </Badge>
+              )}
             </Button>
             <Button onClick={() => navigate("/")} variant="outline">
               Home
