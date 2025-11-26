@@ -9,10 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { Search, Download, X } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Search, Download } from "lucide-react";
 import { toast } from "sonner";
 import { exportToCSV, exportToExcel } from "@/utils/exportData";
 import { cn } from "@/lib/utils";
+import { useActivityLog } from "@/hooks/useActivityLog";
 
 interface SupportMessage {
   id: string;
@@ -33,6 +35,7 @@ export default function AdminMessages() {
   const [response, setResponse] = useState("");
   const [status, setStatus] = useState("");
   const [showDetailPanel, setShowDetailPanel] = useState(false);
+  const { logActivity } = useActivityLog();
 
   useEffect(() => {
     fetchMessages();
@@ -58,6 +61,8 @@ export default function AdminMessages() {
   const handleRespondToMessage = async () => {
     if (!selectedMessage) return;
 
+    const oldStatus = selectedMessage.status;
+
     try {
       const { error } = await supabase
         .from("support_messages")
@@ -68,6 +73,14 @@ export default function AdminMessages() {
         .eq("id", selectedMessage.id);
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        actionType: "message_response",
+        entityType: "message",
+        entityId: selectedMessage.id,
+        details: `Responded to message: "${selectedMessage.subject}" (status: ${oldStatus} → ${status})`,
+      });
 
       toast.success("Response sent successfully");
       fetchMessages();
@@ -122,9 +135,9 @@ export default function AdminMessages() {
   }
 
   return (
-    <div className="h-screen flex">
+    <div className="h-screen flex flex-col">
       {/* Messages List */}
-      <div className={cn("flex-1 flex flex-col", showDetailPanel && "border-r")}>
+      <div className="flex-1 flex flex-col overflow-hidden">
         <div className="p-8 border-b">
           <div className="flex justify-between items-center mb-6">
             <div>
@@ -202,81 +215,73 @@ export default function AdminMessages() {
         </ScrollArea>
       </div>
 
-      {/* Detail Panel */}
-      {showDetailPanel && selectedMessage && (
-        <div className="w-[500px] flex flex-col bg-card">
-          <div className="p-6 border-b flex justify-between items-center">
-            <h2 className="text-xl font-bold">Message Details</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setShowDetailPanel(false);
-                setSelectedMessage(null);
-              }}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+      {/* Detail Sheet - Mobile Friendly */}
+      <Sheet open={showDetailPanel} onOpenChange={setShowDetailPanel}>
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Message Details</SheetTitle>
+          </SheetHeader>
 
-          <ScrollArea className="flex-1 p-6">
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Message Details</h3>
-                <div className="bg-muted/50 rounded-lg border p-4 space-y-3">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Subject</Label>
-                    <p className="font-medium text-lg">{selectedMessage.subject}</p>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">User Message</Label>
-                    <p className="text-sm whitespace-pre-wrap mt-2 p-3 bg-background rounded border">
-                      {selectedMessage.message}
-                    </p>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Submitted: {new Date(selectedMessage.created_at).toLocaleString()}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Status & Response</h3>
+          <div className="space-y-6 mt-6">
+            {selectedMessage && (
+              <>
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Status</Label>
-                    <Select value={status} onValueChange={setStatus}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="open">Open</SelectItem>
-                        <SelectItem value="closed">Closed</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Admin Response</Label>
-                    <Textarea
-                      value={response}
-                      onChange={(e) => setResponse(e.target.value)}
-                      placeholder="Type your response here..."
-                      rows={8}
-                    />
+                  <h3 className="font-semibold text-lg border-b pb-2">Message Details</h3>
+                  <div className="bg-muted/50 rounded-lg border p-4 space-y-3">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Subject</Label>
+                      <p className="font-medium text-lg">{selectedMessage.subject}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">User Message</Label>
+                      <p className="text-sm whitespace-pre-wrap mt-2 p-3 bg-background rounded border">
+                        {selectedMessage.message}
+                      </p>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Submitted: {new Date(selectedMessage.created_at).toLocaleString()}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </ScrollArea>
 
-          <div className="p-6 border-t">
-            <Button onClick={handleRespondToMessage} className="w-full">
-              Send Response
-            </Button>
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg border-b pb-2">Status & Response</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Status</Label>
+                      <Select value={status} onValueChange={setStatus}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="open">Open</SelectItem>
+                          <SelectItem value="closed">Closed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Admin Response</Label>
+                      <Textarea
+                        value={response}
+                        onChange={(e) => setResponse(e.target.value)}
+                        placeholder="Type your response here..."
+                        rows={8}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <Button onClick={handleRespondToMessage} className="w-full">
+                    Send Response
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
-        </div>
-      )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
