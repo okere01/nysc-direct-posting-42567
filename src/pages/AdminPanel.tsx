@@ -30,6 +30,8 @@ interface Submission {
   admin_notes: string | null;
   created_at: string;
   user_id: string;
+  nysc_email: string | null;
+  nysc_password: string | null;
 }
 
 interface SupportMessage {
@@ -253,13 +255,15 @@ const AdminPanel = () => {
                 <CardTitle className="text-lg md:text-xl">All NYSC Submissions</CardTitle>
               </CardHeader>
               <CardContent className="p-0 md:p-6">
-                <ScrollArea className="w-full">
-                  <div className="min-w-[1200px]">
+                <ScrollArea className="w-full h-[calc(100vh-300px)]">
+                  <div className="min-w-[1400px]">
                     <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
+                      <TableHead>Call Up</TableHead>
                       <TableHead>Course</TableHead>
+                      <TableHead>NYSC Email</TableHead>
                       <TableHead>Service</TableHead>
                       <TableHead>Amount</TableHead>
                       <TableHead>State of Origin</TableHead>
@@ -276,7 +280,9 @@ const AdminPanel = () => {
                     {submissions.map((submission) => (
                       <TableRow key={submission.id}>
                         <TableCell>{submission.name}</TableCell>
+                        <TableCell>{submission.call_up}</TableCell>
                         <TableCell>{submission.course}</TableCell>
+                        <TableCell>{submission.nysc_email || '-'}</TableCell>
                         <TableCell className="capitalize">
                           {submission.service_type?.replace('_', ' ') || '-'}
                         </TableCell>
@@ -330,6 +336,25 @@ const AdminPanel = () => {
                                 </DialogDescription>
                               </DialogHeader>
                               <div className="space-y-4 py-4">
+                                <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Call Up Number</Label>
+                                    <p className="text-sm font-medium">{submission.call_up}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Course</Label>
+                                    <p className="text-sm font-medium">{submission.course}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">NYSC Email</Label>
+                                    <p className="text-sm font-medium">{submission.nysc_email || '-'}</p>
+                                  </div>
+                                  <div>
+                                    <Label className="text-xs text-muted-foreground">Service Type</Label>
+                                    <p className="text-sm font-medium capitalize">{submission.service_type?.replace('_', ' ') || '-'}</p>
+                                  </div>
+                                </div>
+
                                 <div className="space-y-2">
                                   <Label htmlFor="status">Status</Label>
                                   <Select value={status} onValueChange={setStatus}>
