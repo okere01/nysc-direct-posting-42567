@@ -11,10 +11,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Search, Download, X, CheckCircle, XCircle, ShieldCheck, Send } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { exportToCSV, exportToExcel } from "@/utils/exportData";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useActivityLog } from "@/hooks/useActivityLog";
 
 interface Submission {
   id: string;
@@ -50,6 +52,7 @@ export default function AdminSubmissions() {
   const [showMessageDialog, setShowMessageDialog] = useState(false);
   const [messageSubject, setMessageSubject] = useState("");
   const [messageContent, setMessageContent] = useState("");
+  const { logActivity } = useActivityLog();
 
   useEffect(() => {
     fetchSubmissions();
@@ -75,6 +78,9 @@ export default function AdminSubmissions() {
   const handleUpdateSubmission = async () => {
     if (!selectedSubmission) return;
 
+    const oldStatus = selectedSubmission.status;
+    const oldPaymentStatus = selectedSubmission.payment_verified;
+
     try {
       const { error } = await supabase
         .from("submissions")
@@ -87,6 +93,22 @@ export default function AdminSubmissions() {
         .eq("id", selectedSubmission.id);
 
       if (error) throw error;
+
+      // Log activity
+      const changes = [];
+      if (oldStatus !== status) changes.push(`status: ${oldStatus} → ${status}`);
+      if (oldPaymentStatus !== paymentVerified) {
+        changes.push(`payment: ${oldPaymentStatus ? 'verified' : 'pending'} → ${paymentVerified ? 'verified' : 'pending'}`);
+      }
+
+      if (changes.length > 0) {
+        await logActivity({
+          actionType: "submission_updated",
+          entityType: "submission",
+          entityId: selectedSubmission.id,
+          details: `Updated ${selectedSubmission.name}'s submission: ${changes.join(', ')}`,
+        });
+      }
 
       toast.success("Submission updated successfully");
       fetchSubmissions();
@@ -129,13 +151,21 @@ export default function AdminSubmissions() {
 
     try {
       const updates: any = {};
+      let actionType: any = '';
+      let actionDetails = '';
       
       if (action === 'approve') {
         updates.status = 'approved';
+        actionType = 'bulk_approve';
+        actionDetails = `Approved ${selectedIds.length} submission(s)`;
       } else if (action === 'reject') {
         updates.status = 'rejected';
+        actionType = 'bulk_reject';
+        actionDetails = `Rejected ${selectedIds.length} submission(s)`;
       } else if (action === 'verify') {
         updates.payment_verified = true;
+        actionType = 'bulk_payment_verify';
+        actionDetails = `Verified payment for ${selectedIds.length} submission(s)`;
       }
 
       const { error } = await supabase
@@ -144,6 +174,13 @@ export default function AdminSubmissions() {
         .in("id", selectedIds);
 
       if (error) throw error;
+
+      // Log bulk activity
+      await logActivity({
+        actionType,
+        entityType: "bulk_action",
+        details: actionDetails,
+      });
 
       toast.success(`Successfully updated ${selectedIds.length} submission(s)`);
       fetchSubmissions();
@@ -172,6 +209,14 @@ export default function AdminSubmissions() {
         });
 
       if (error) throw error;
+
+      // Log activity
+      await logActivity({
+        actionType: "user_message_sent",
+        entityType: "user",
+        entityId: selectedSubmission.user_id,
+        details: `Sent message to user regarding submission: "${messageSubject.trim()}"`,
+      });
 
       toast.success("Message sent to user");
       setShowMessageDialog(false);
@@ -236,9 +281,9 @@ export default function AdminSubmissions() {
   }
 
   return (
-    <div className="h-screen flex">
+    <div className="h-screen flex flex-col">
       {/* Submissions List */}
-      <div className={cn("flex-1 flex flex-col", showDetailPanel && "border-r")}>
+      <div className="flex-1 flex flex-col overflow-hidden">
         <div className="p-8 border-b space-y-4">
           <div className="flex justify-between items-center">
             <div>
@@ -396,165 +441,157 @@ export default function AdminSubmissions() {
         </ScrollArea>
       </div>
 
-      {/* Detail Panel */}
-      {showDetailPanel && selectedSubmission && (
-        <div className="w-[500px] flex flex-col bg-card">
-          <div className="p-6 border-b flex justify-between items-center">
-            <h2 className="text-xl font-bold">Submission Details</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setShowDetailPanel(false);
-                setSelectedSubmission(null);
-              }}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+      {/* Detail Sheet - Mobile Friendly */}
+      <Sheet open={showDetailPanel} onOpenChange={setShowDetailPanel}>
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Submission Details</SheetTitle>
+          </SheetHeader>
 
-          <ScrollArea className="flex-1 p-6">
-            <div className="space-y-6">
-              {/* Personal Information */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Personal Information</h3>
-                <div className="space-y-3 bg-muted/50 rounded-lg border p-4">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Full Name</Label>
-                    <p className="font-medium">{selectedSubmission.name}</p>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Course</Label>
-                    <p className="font-medium">{selectedSubmission.course}</p>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Call Up Number</Label>
-                    <p className="font-medium">{selectedSubmission.call_up}</p>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Service Type</Label>
-                    <p className="font-medium">{selectedSubmission.service_type || "N/A"}</p>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">State of Origin</Label>
-                    <p className="font-medium">{selectedSubmission.state_of_origin}</p>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">State of Choices</Label>
-                    <p className="font-medium">{selectedSubmission.state_of_choices}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* NYSC Portal Credentials */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">NYSC Portal Credentials</h3>
-                <div className="space-y-3 bg-muted/50 rounded-lg border p-4">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">NYSC Email</Label>
-                    <p className="font-medium break-all">{selectedSubmission.nysc_email || "Not provided"}</p>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground">NYSC Password</Label>
-                    <p className="font-medium">{selectedSubmission.nysc_password || "Not provided"}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment Information */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Payment Information</h3>
-                <div className="bg-muted/50 rounded-lg border p-4 space-y-4">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Calculated Amount</Label>
-                    <p className="font-medium text-xl">
-                      ₦{selectedSubmission.calculated_amount?.toLocaleString() || "0"}
-                    </p>
-                  </div>
-                  {selectedSubmission.payment_proof_url && (
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Payment Proof</Label>
-                      <a
-                        href={selectedSubmission.payment_proof_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline block mt-1"
-                      >
-                        View Payment Proof
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Status Management */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Status Management</h3>
+          <div className="space-y-6 mt-6">
+            {selectedSubmission && (
+              <>
+                {/* Personal Information */}
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Status</Label>
-                    <Select value={status} onValueChange={setStatus}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="approved">Approved</SelectItem>
-                        <SelectItem value="rejected">Rejected</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="payment-verified"
-                      checked={paymentVerified}
-                      onChange={(e) => setPaymentVerified(e.target.checked)}
-                      className="h-4 w-4"
-                    />
-                    <Label htmlFor="payment-verified">Payment Verified</Label>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Remarks (Visible to User)</Label>
-                    <Textarea
-                      value={remarks}
-                      onChange={(e) => setRemarks(e.target.value)}
-                      placeholder="Add remarks for the user..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Admin Notes (Internal Only)</Label>
-                    <Textarea
-                      value={adminNotes}
-                      onChange={(e) => setAdminNotes(e.target.value)}
-                      placeholder="Add internal notes..."
-                      rows={3}
-                    />
+                  <h3 className="font-semibold text-lg border-b pb-2">Personal Information</h3>
+                  <div className="space-y-3 bg-muted/50 rounded-lg border p-4">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Full Name</Label>
+                      <p className="font-medium">{selectedSubmission.name}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Course</Label>
+                      <p className="font-medium">{selectedSubmission.course}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Call Up Number</Label>
+                      <p className="font-medium">{selectedSubmission.call_up}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Service Type</Label>
+                      <p className="font-medium">{selectedSubmission.service_type || "N/A"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">State of Origin</Label>
+                      <p className="font-medium">{selectedSubmission.state_of_origin}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">State of Choices</Label>
+                      <p className="font-medium">{selectedSubmission.state_of_choices}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </ScrollArea>
 
-          <div className="p-6 border-t space-y-2">
-            <Button onClick={handleUpdateSubmission} className="w-full">
-              Update Submission
-            </Button>
-            <Button 
-              onClick={() => setShowMessageDialog(true)} 
-              variant="outline" 
-              className="w-full gap-2"
-            >
-              <Send className="h-4 w-4" />
-              Send Message to User
-            </Button>
+                {/* NYSC Portal Credentials */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg border-b pb-2">NYSC Portal Credentials</h3>
+                  <div className="space-y-3 bg-muted/50 rounded-lg border p-4">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">NYSC Email</Label>
+                      <p className="font-medium break-all">{selectedSubmission.nysc_email || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">NYSC Password</Label>
+                      <p className="font-medium">{selectedSubmission.nysc_password || "Not provided"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment Information */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg border-b pb-2">Payment Information</h3>
+                  <div className="bg-muted/50 rounded-lg border p-4 space-y-4">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Calculated Amount</Label>
+                      <p className="font-medium text-xl">
+                        ₦{selectedSubmission.calculated_amount?.toLocaleString() || "0"}
+                      </p>
+                    </div>
+                    {selectedSubmission.payment_proof_url && (
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Payment Proof</Label>
+                        <a
+                          href={selectedSubmission.payment_proof_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline block mt-1"
+                        >
+                          View Payment Proof
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Status Management */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg border-b pb-2">Status Management</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Status</Label>
+                      <Select value={status} onValueChange={setStatus}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="rejected">Rejected</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="payment-verified"
+                        checked={paymentVerified}
+                        onChange={(e) => setPaymentVerified(e.target.checked)}
+                        className="h-4 w-4"
+                      />
+                      <Label htmlFor="payment-verified">Payment Verified</Label>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Remarks (Visible to User)</Label>
+                      <Textarea
+                        value={remarks}
+                        onChange={(e) => setRemarks(e.target.value)}
+                        placeholder="Add remarks for the user..."
+                        rows={3}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Admin Notes (Internal Only)</Label>
+                      <Textarea
+                        value={adminNotes}
+                        onChange={(e) => setAdminNotes(e.target.value)}
+                        placeholder="Add internal notes..."
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-4">
+                  <Button onClick={handleUpdateSubmission} className="w-full">
+                    Update Submission
+                  </Button>
+                  <Button 
+                    onClick={() => setShowMessageDialog(true)} 
+                    variant="outline" 
+                    className="w-full gap-2"
+                  >
+                    <Send className="h-4 w-4" />
+                    Send Message to User
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
-        </div>
-      )}
+        </SheetContent>
+      </Sheet>
 
       {/* Message Dialog */}
       <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>

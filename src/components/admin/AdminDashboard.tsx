@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, MessageSquare, Users, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ActivityLog } from "@/components/admin/ActivityLog";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -119,35 +120,7 @@ export default function AdminDashboard() {
           })}
         </div>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-2 w-2 rounded-full bg-green-600" />
-                  <p className="text-sm text-muted-foreground">
-                    {stats.verifiedPayments} payments verified
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-2 w-2 rounded-full bg-yellow-600" />
-                  <p className="text-sm text-muted-foreground">
-                    {stats.pendingSubmissions} submissions pending review
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-2 w-2 rounded-full bg-orange-600" />
-                  <p className="text-sm text-muted-foreground">
-                    {stats.openMessages} messages awaiting response
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
+        <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>Quick Stats</CardTitle>
@@ -181,6 +154,8 @@ export default function AdminDashboard() {
               </div>
             </CardContent>
           </Card>
+
+          <ActivityLog limit={10} />
         </div>
       </div>
     </ScrollArea>
