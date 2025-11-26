@@ -163,7 +163,8 @@ export default function AdminMessages() {
 
         <ScrollArea className="flex-1">
           <Card className="m-8 mt-0">
-            <CardContent className="p-0">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
@@ -183,19 +184,20 @@ export default function AdminMessages() {
                       )}
                       onClick={() => handleSelectMessage(message)}
                     >
-                      <TableCell className="font-medium">{message.subject}</TableCell>
-                      <TableCell className="max-w-md truncate">{message.message}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium whitespace-nowrap">{message.subject}</TableCell>
+                      <TableCell className="max-w-md truncate whitespace-nowrap">{message.message}</TableCell>
+                      <TableCell className="whitespace-nowrap">
                         <Badge variant={message.status === "closed" ? "default" : "secondary"}>
                           {message.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>{new Date(message.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell className="whitespace-nowrap">{new Date(message.created_at).toLocaleDateString()}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </CardContent>
+            </div>
+          </CardContent>
           </Card>
         </ScrollArea>
       </div>
