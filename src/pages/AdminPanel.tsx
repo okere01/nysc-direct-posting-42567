@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 interface Submission {
   id: string;
@@ -45,9 +47,18 @@ interface SupportMessage {
   updated_at: string;
 }
 
+interface UserProfile {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+  created_at: string;
+  role: string;
+}
+
 const AdminPanel = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [supportMessages, setSupportMessages] = useState<SupportMessage[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [selectedMessage, setSelectedMessage] = useState<SupportMessage | null>(null);
@@ -57,6 +68,9 @@ const AdminPanel = () => {
   const [paymentVerified, setPaymentVerified] = useState(false);
   const [messageResponse, setMessageResponse] = useState("");
   const [messageStatus, setMessageStatus] = useState("");
+  const [submissionsSearch, setSubmissionsSearch] = useState("");
+  const [messagesSearch, setMessagesSearch] = useState("");
+  const [usersSearch, setUsersSearch] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAdmin, loading: roleLoading } = useUserRole();
@@ -74,6 +88,7 @@ const AdminPanel = () => {
         checkAuth();
         fetchAllSubmissions();
         fetchSupportMessages();
+        fetchUsers();
       }
     }
   }, [isAdmin, roleLoading]);
@@ -118,6 +133,39 @@ const AdminPanel = () => {
       toast({
         title: "Error",
         description: "Failed to load support messages",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(`
+          id,
+          email,
+          full_name,
+          created_at,
+          user_roles!inner(role)
+        `)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      
+      const formattedUsers = data?.map((user: any) => ({
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        created_at: user.created_at,
+        role: user.user_roles?.role || 'user'
+      })) || [];
+      
+      setUsers(formattedUsers);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load users",
         variant: "destructive",
       });
     }
@@ -219,6 +267,27 @@ const AdminPanel = () => {
     }
   };
 
+  const filteredSubmissions = submissions.filter(sub => 
+    sub.name.toLowerCase().includes(submissionsSearch.toLowerCase()) ||
+    sub.call_up.toLowerCase().includes(submissionsSearch.toLowerCase()) ||
+    sub.course.toLowerCase().includes(submissionsSearch.toLowerCase()) ||
+    sub.state_of_origin.toLowerCase().includes(submissionsSearch.toLowerCase()) ||
+    sub.state_of_choices.toLowerCase().includes(submissionsSearch.toLowerCase()) ||
+    (sub.nysc_email && sub.nysc_email.toLowerCase().includes(submissionsSearch.toLowerCase()))
+  );
+
+  const filteredMessages = supportMessages.filter(msg =>
+    msg.subject.toLowerCase().includes(messagesSearch.toLowerCase()) ||
+    msg.message.toLowerCase().includes(messagesSearch.toLowerCase()) ||
+    (msg.admin_response && msg.admin_response.toLowerCase().includes(messagesSearch.toLowerCase()))
+  );
+
+  const filteredUsers = users.filter(user =>
+    (user.email && user.email.toLowerCase().includes(usersSearch.toLowerCase())) ||
+    (user.full_name && user.full_name.toLowerCase().includes(usersSearch.toLowerCase())) ||
+    user.role.toLowerCase().includes(usersSearch.toLowerCase())
+  );
+
   if (loading || roleLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -244,15 +313,27 @@ const AdminPanel = () => {
         </div>
 
         <Tabs defaultValue="submissions" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4 md:mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-4 md:mb-6">
             <TabsTrigger value="submissions" className="text-xs sm:text-sm">NYSC Submissions</TabsTrigger>
             <TabsTrigger value="support" className="text-xs sm:text-sm">Support Messages</TabsTrigger>
+            <TabsTrigger value="users" className="text-xs sm:text-sm">Users</TabsTrigger>
           </TabsList>
 
           <TabsContent value="submissions">
             <Card>
               <CardHeader className="p-4 md:p-6">
-                <CardTitle className="text-lg md:text-xl">All NYSC Submissions</CardTitle>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <CardTitle className="text-lg md:text-xl">All NYSC Submissions</CardTitle>
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      placeholder="Search submissions..."
+                      value={submissionsSearch}
+                      onChange={(e) => setSubmissionsSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="p-0 md:p-6">
                 <ScrollArea className="w-full h-[calc(100vh-300px)]">
@@ -277,7 +358,7 @@ const AdminPanel = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {submissions.map((submission) => (
+                    {filteredSubmissions.map((submission) => (
                       <TableRow key={submission.id}>
                         <TableCell>{submission.name}</TableCell>
                         <TableCell>{submission.call_up}</TableCell>
@@ -452,7 +533,18 @@ const AdminPanel = () => {
           <TabsContent value="support">
             <Card>
               <CardHeader className="p-4 md:p-6">
-                <CardTitle className="text-lg md:text-xl">Support Messages</CardTitle>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <CardTitle className="text-lg md:text-xl">Support Messages</CardTitle>
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      placeholder="Search messages..."
+                      value={messagesSearch}
+                      onChange={(e) => setMessagesSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="p-0 md:p-6">
                 <ScrollArea className="w-full">
@@ -469,7 +561,7 @@ const AdminPanel = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {supportMessages.map((msg) => (
+                    {filteredMessages.map((msg) => (
                       <TableRow key={msg.id}>
                         <TableCell className="font-medium">{msg.subject}</TableCell>
                         <TableCell className="max-w-xs truncate">{msg.message}</TableCell>
@@ -546,6 +638,57 @@ const AdminPanel = () => {
                     ))}
                   </TableBody>
                 </Table>
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users">
+            <Card>
+              <CardHeader className="p-4 md:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <CardTitle className="text-lg md:text-xl">Registered Users</CardTitle>
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      placeholder="Search users..."
+                      value={usersSearch}
+                      onChange={(e) => setUsersSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0 md:p-6">
+                <ScrollArea className="w-full h-[calc(100vh-300px)]">
+                  <div className="min-w-[800px]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Full Name</TableHead>
+                          <TableHead>Role</TableHead>
+                          <TableHead>Registration Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredUsers.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell className="font-medium">{user.email || '-'}</TableCell>
+                            <TableCell>{user.full_name || '-'}</TableCell>
+                            <TableCell>
+                              <Badge className={user.role === 'admin' ? 'bg-purple-500' : 'bg-blue-500'}>
+                                {user.role}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {new Date(user.created_at).toLocaleDateString()}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 </ScrollArea>
               </CardContent>
