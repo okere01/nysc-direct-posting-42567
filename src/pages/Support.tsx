@@ -12,6 +12,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Bell, MessageCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const messageSchema = z.object({
   subject: z.string().trim().min(3, "Subject must be at least 3 characters").max(200, "Subject too long"),
@@ -31,6 +34,8 @@ interface Message {
 const Support = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [replyText, setReplyText] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -105,6 +110,50 @@ const Support = () => {
     }
   };
 
+  const handleReply = async (messageId: string) => {
+    if (!replyText.trim() || replyText.trim().length < 10) {
+      toast({
+        title: "Error",
+        description: "Reply must be at least 10 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const originalMessage = messages.find(m => m.id === messageId);
+      const newSubject = `Re: ${originalMessage?.subject || ""}`;
+
+      const { error } = await supabase
+        .from("support_messages")
+        .insert({
+          user_id: user.id,
+          subject: newSubject,
+          message: replyText,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Your reply has been sent",
+      });
+
+      setReplyText("");
+      setReplyingTo(null);
+      fetchMessages();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send reply",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "open":
@@ -120,6 +169,9 @@ const Support = () => {
     }
   };
 
+  const messagesWithResponses = messages.filter(m => m.admin_response);
+  const unreadResponses = messagesWithResponses.filter(m => m.status !== "closed");
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -128,7 +180,15 @@ const Support = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted p-8">
       <div className="max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground">Support & Contact</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-4xl font-bold text-foreground">Support & Contact</h1>
+            {unreadResponses.length > 0 && (
+              <Badge variant="destructive" className="animate-pulse">
+                <Bell className="h-3 w-3 mr-1" />
+                {unreadResponses.length} New Response{unreadResponses.length > 1 ? 's' : ''}
+              </Badge>
+            )}
+          </div>
           <div className="space-x-4">
             <Button onClick={() => navigate("/submissions")} variant="outline">
               My Submissions
@@ -138,6 +198,16 @@ const Support = () => {
             </Button>
           </div>
         </div>
+
+        {unreadResponses.length > 0 && (
+          <Alert className="mb-6 border-green-500/50 bg-green-500/10">
+            <Bell className="h-4 w-4 text-green-600" />
+            <AlertTitle className="text-green-600">New Admin Responses!</AlertTitle>
+            <AlertDescription className="text-green-600">
+              You have {unreadResponses.length} message{unreadResponses.length > 1 ? 's' : ''} with admin responses. Check your messages below.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid gap-6 md:grid-cols-2">
           {/* New Message Form */}
@@ -201,18 +271,75 @@ const Support = () => {
               ) : (
                 <div className="space-y-4 max-h-[600px] overflow-y-auto">
                   {messages.map((msg) => (
-                    <div key={msg.id} className="border rounded-lg p-4 space-y-2">
+                    <div 
+                      key={msg.id} 
+                      className={`border rounded-lg p-4 space-y-2 ${
+                        msg.admin_response && msg.status !== "closed" 
+                          ? "border-green-500 bg-green-500/5" 
+                          : ""
+                      }`}
+                    >
                       <div className="flex justify-between items-start">
-                        <h3 className="font-semibold">{msg.subject}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold">{msg.subject}</h3>
+                          {msg.admin_response && msg.status !== "closed" && (
+                            <Badge variant="outline" className="bg-green-500 text-white border-green-500 text-xs">
+                              <Bell className="h-3 w-3 mr-1" />
+                              New Response
+                            </Badge>
+                          )}
+                        </div>
                         <Badge className={getStatusColor(msg.status)}>
                           {msg.status}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">{msg.message}</p>
                       {msg.admin_response && (
-                        <div className="mt-3 p-3 bg-muted rounded-md">
+                        <div className="mt-3 p-3 bg-muted rounded-md border-l-4 border-primary">
                           <p className="text-xs font-semibold text-primary mb-1">Admin Response:</p>
                           <p className="text-sm">{msg.admin_response}</p>
+                          {msg.status !== "closed" && (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="mt-3"
+                                  onClick={() => setReplyingTo(msg)}
+                                >
+                                  <MessageCircle className="h-3 w-3 mr-1" />
+                                  Reply
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Reply to: {msg.subject}</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4 mt-4">
+                                  <div className="p-3 bg-muted rounded-md">
+                                    <p className="text-xs font-semibold mb-1">Admin's Response:</p>
+                                    <p className="text-sm">{msg.admin_response}</p>
+                                  </div>
+                                  <div>
+                                    <Label>Your Reply</Label>
+                                    <Textarea
+                                      placeholder="Type your reply..."
+                                      value={replyText}
+                                      onChange={(e) => setReplyText(e.target.value)}
+                                      rows={5}
+                                      className="mt-2"
+                                    />
+                                  </div>
+                                  <Button 
+                                    onClick={() => handleReply(msg.id)}
+                                    className="w-full"
+                                  >
+                                    Send Reply
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          )}
                         </div>
                       )}
                       <p className="text-xs text-muted-foreground">
