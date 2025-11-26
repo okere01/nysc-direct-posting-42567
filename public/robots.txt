@@ -1,3 +1,8 @@
+# Robots.txt for NYSC Direct Posting Platform
+# Sitemap location
+Sitemap: https://preview--nysc-direct-posting-42567.lovable.app/sitemap.xml
+
+# Allow all major search engines
 User-agent: Googlebot
 Allow: /
 
@@ -10,5 +15,17 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: LinkedInBot
+Allow: /
+
+# Default rule for other bots
 User-agent: *
 Allow: /
+
+# Disallow admin and sensitive routes from indexing
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/*
+
+# Crawl delay to be respectful
+Crawl-delay: 1

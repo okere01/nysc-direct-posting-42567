@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Homepage -->
+  <url>
+    <loc>https://preview--nysc-direct-posting-42567.lovable.app/</loc>
+    <lastmod>2025-11-26</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://preview--nysc-direct-posting-42567.lovable.app/icon-512x512.png</image:loc>
+      <image:title>NYSC Direct Posting Platform</image:title>
+    </image:image>
+  </url>
+  
+  <!-- Authentication Page -->
+  <url>
+    <loc>https://preview--nysc-direct-posting-42567.lovable.app/auth</loc>
+    <lastmod>2025-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Support Page -->
+  <url>
+    <loc>https://preview--nysc-direct-posting-42567.lovable.app/support</loc>
+    <lastmod>2025-11-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+</urlset>

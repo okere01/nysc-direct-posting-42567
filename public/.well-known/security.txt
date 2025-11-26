@@ -1,0 +1,11 @@
+Contact: mailto:security@nysc-posting.app
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://preview--nysc-direct-posting-42567.lovable.app/.well-known/security.txt
+
+# Security Policy
+# If you discover a security vulnerability, please report it responsibly.
+# We appreciate your efforts to improve our security.
+
+Policy: https://preview--nysc-direct-posting-42567.lovable.app/security-policy
+Acknowledgments: https://preview--nysc-direct-posting-42567.lovable.app/security-acknowledgments
