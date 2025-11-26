@@ -155,7 +155,7 @@ export default function AdminSubmissions() {
       let actionDetails = '';
       
       if (action === 'approve') {
-        updates.status = 'approved';
+        updates.status = 'completed';
         actionType = 'bulk_approve';
         actionDetails = `Approved ${selectedIds.length} submission(s)`;
       } else if (action === 'reject') {
@@ -413,8 +413,13 @@ export default function AdminSubmissions() {
                         className="cursor-pointer"
                         onClick={() => handleSelectSubmission(submission)}
                       >
-                        <Badge variant={submission.status === "approved" ? "default" : "secondary"}>
-                          {submission.status}
+                        <Badge variant={
+                          submission.status === "completed" ? "default" :
+                          submission.status === "rejected" ? "destructive" :
+                          submission.status === "in_progress" ? "outline" :
+                          "secondary"
+                        }>
+                          {submission.status.replace('_', ' ')}
                         </Badge>
                       </TableCell>
                       <TableCell 
@@ -535,7 +540,8 @@ export default function AdminSubmissions() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="approved">Approved</SelectItem>
+                          <SelectItem value="in_progress">In Progress</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
                           <SelectItem value="rejected">Rejected</SelectItem>
                         </SelectContent>
                       </Select>
