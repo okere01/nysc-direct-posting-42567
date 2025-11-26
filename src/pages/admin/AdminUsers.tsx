@@ -6,7 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { Search, Download } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Search, Download, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { exportToCSV, exportToExcel } from "@/utils/exportData";
 
@@ -22,6 +25,10 @@ export default function AdminUsers() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [messageSubject, setMessageSubject] = useState("");
+  const [messageContent, setMessageContent] = useState("");
 
   useEffect(() => {
     fetchUsers();
@@ -82,6 +89,33 @@ export default function AdminUsers() {
     toast.success("Exported to Excel");
   };
 
+  const handleSendMessage = async () => {
+    if (!selectedUser || !messageSubject || !messageContent) {
+      toast.error("Please fill all fields");
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("support_messages").insert({
+        user_id: selectedUser.id,
+        subject: messageSubject,
+        message: messageContent,
+        status: "open",
+      });
+
+      if (error) throw error;
+
+      toast.success("Message sent successfully");
+      setMessageDialogOpen(false);
+      setMessageSubject("");
+      setMessageContent("");
+      setSelectedUser(null);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("Failed to send message");
+    }
+  };
+
   const filteredUsers = users.filter(
     (user) =>
       user.email?.toLowerCase().includes(search.toLowerCase()) ||
@@ -134,34 +168,82 @@ export default function AdminUsers() {
           </CardHeader>
           <CardContent className="p-0">
             <ScrollArea className="h-[calc(100vh-280px)]">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead className="font-semibold">Email</TableHead>
-                    <TableHead className="font-semibold">Full Name</TableHead>
-                    <TableHead className="font-semibold">Role</TableHead>
-                    <TableHead className="font-semibold">Joined Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow key={user.id} className="hover:bg-muted/30">
-                      <TableCell className="font-medium">{user.email || "N/A"}</TableCell>
-                      <TableCell>{user.full_name || "N/A"}</TableCell>
-                      <TableCell>
-                        <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                          {user.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="font-semibold">Email</TableHead>
+                      <TableHead className="font-semibold">Full Name</TableHead>
+                      <TableHead className="font-semibold">Role</TableHead>
+                      <TableHead className="font-semibold">Joined Date</TableHead>
+                      <TableHead className="font-semibold">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => (
+                      <TableRow key={user.id} className="hover:bg-muted/30">
+                        <TableCell className="font-medium whitespace-nowrap">{user.email || "N/A"}</TableCell>
+                        <TableCell className="whitespace-nowrap">{user.full_name || "N/A"}</TableCell>
+                        <TableCell>
+                          <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                            {user.role}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setMessageDialogOpen(true);
+                            }}
+                          >
+                            <MessageSquare className="h-4 w-4 mr-1" />
+                            Message
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </ScrollArea>
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send Message to {selectedUser?.email}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="subject">Subject</Label>
+              <Input
+                id="subject"
+                value={messageSubject}
+                onChange={(e) => setMessageSubject(e.target.value)}
+                placeholder="Message subject"
+              />
+            </div>
+            <div>
+              <Label htmlFor="message">Message</Label>
+              <Textarea
+                id="message"
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                placeholder="Type your message here..."
+                rows={6}
+              />
+            </div>
+            <Button onClick={handleSendMessage} className="w-full">
+              Send Message
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </ScrollArea>
   );
 }

@@ -320,7 +320,8 @@ export default function AdminSubmissions() {
         <ScrollArea className="flex-1">
           <Card className="m-8 mt-0">
             <CardContent className="p-0">
-              <Table>
+              <div className="overflow-x-auto">
+                <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
                     <TableHead className="w-12">
@@ -389,6 +390,7 @@ export default function AdminSubmissions() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </CardContent>
           </Card>
         </ScrollArea>
