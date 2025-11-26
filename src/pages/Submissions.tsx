@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 interface Submission {
   id: string;
@@ -26,6 +28,7 @@ interface Submission {
 const Submissions = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -81,6 +84,16 @@ const Submissions = () => {
     }
   };
 
+  const filteredSubmissions = submissions.filter(sub =>
+    sub.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    sub.course.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    sub.call_up.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    sub.state_of_origin.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    sub.state_of_choices.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    sub.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (sub.service_type && sub.service_type.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -113,7 +126,18 @@ const Submissions = () => {
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle>Your NYSC Submissions</CardTitle>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <CardTitle>Your NYSC Submissions</CardTitle>
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder="Search submissions..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <Table>
@@ -132,7 +156,14 @@ const Submissions = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {submissions.map((submission) => (
+                  {filteredSubmissions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
+                        No submissions found matching your search.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredSubmissions.map((submission) => (
                     <TableRow key={submission.id}>
                       <TableCell>{submission.name}</TableCell>
                       <TableCell>{submission.course}</TableCell>
@@ -165,7 +196,7 @@ const Submissions = () => {
                         {new Date(submission.created_at).toLocaleDateString()}
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )))}
                 </TableBody>
               </Table>
             </CardContent>
