@@ -299,17 +299,66 @@ const AdminPanel = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted p-4 md:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">Admin Panel</h1>
-          <div className="flex flex-wrap gap-2 sm:gap-4">
-            <Button onClick={() => navigate("/submissions")} variant="outline" size="sm" className="sm:size-default">
-              My Submissions
-            </Button>
-            <Button onClick={handleLogout} variant="destructive" size="sm" className="sm:size-default">
-              Logout
-            </Button>
+      <div className="max-w-[1800px] mx-auto">
+        {/* Header Section */}
+        <div className="bg-card border rounded-lg p-6 mb-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">Admin Dashboard</h1>
+              <p className="text-sm text-muted-foreground">Manage NYSC submissions, support messages, and user accounts</p>
+            </div>
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              <Button onClick={() => navigate("/submissions")} variant="outline" size="sm">
+                My Submissions
+              </Button>
+              <Button onClick={handleLogout} variant="destructive" size="sm">
+                Logout
+              </Button>
+            </div>
           </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <Card className="border-l-4 border-l-primary">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Submissions</p>
+                  <p className="text-2xl font-bold">{submissions.length}</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-2xl">📝</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-l-4 border-l-green-500">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Verified Payments</p>
+                  <p className="text-2xl font-bold">{submissions.filter(s => s.payment_verified).length}</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <span className="text-2xl">✓</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-l-4 border-l-blue-500">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Support Messages</p>
+                  <p className="text-2xl font-bold">{supportMessages.length}</p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <span className="text-2xl">💬</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <Tabs defaultValue="submissions" className="w-full">
@@ -321,9 +370,12 @@ const AdminPanel = () => {
 
           <TabsContent value="submissions">
             <Card>
-              <CardHeader className="p-4 md:p-6">
+              <CardHeader className="p-4 md:p-6 border-b">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <CardTitle className="text-lg md:text-xl">All NYSC Submissions</CardTitle>
+                  <div>
+                    <CardTitle className="text-lg md:text-xl mb-1">All NYSC Submissions</CardTitle>
+                    <p className="text-sm text-muted-foreground">Manage and review all NYSC application submissions</p>
+                  </div>
                   <div className="relative w-full sm:w-64">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input
@@ -336,38 +388,44 @@ const AdminPanel = () => {
                 </div>
               </CardHeader>
               <CardContent className="p-0 md:p-6">
-                <ScrollArea className="w-full h-[calc(100vh-300px)]">
-                  <div className="min-w-[1400px]">
+                <ScrollArea className="w-full h-[calc(100vh-350px)]">
+                  <div className="min-w-[1600px]">
                     <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Call Up</TableHead>
-                      <TableHead>Course</TableHead>
-                      <TableHead>NYSC Email</TableHead>
-                      <TableHead>Service</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>State of Origin</TableHead>
-                      <TableHead>State of Choice</TableHead>
-                       <TableHead>Payment</TableHead>
-                       <TableHead>Proof</TableHead>
-                       <TableHead>Status</TableHead>
-                       <TableHead>Remarks</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Actions</TableHead>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="font-semibold">Name</TableHead>
+                      <TableHead className="font-semibold">Call Up Number</TableHead>
+                      <TableHead className="font-semibold">Course</TableHead>
+                      <TableHead className="font-semibold">NYSC Email</TableHead>
+                      <TableHead className="font-semibold">NYSC Password</TableHead>
+                      <TableHead className="font-semibold">Service Type</TableHead>
+                      <TableHead className="font-semibold">Amount</TableHead>
+                      <TableHead className="font-semibold">State of Origin</TableHead>
+                      <TableHead className="font-semibold">State of Choice</TableHead>
+                       <TableHead className="font-semibold">Payment</TableHead>
+                       <TableHead className="font-semibold">Proof</TableHead>
+                       <TableHead className="font-semibold">Status</TableHead>
+                       <TableHead className="font-semibold">Remarks</TableHead>
+                      <TableHead className="font-semibold">Submitted Date</TableHead>
+                      <TableHead className="font-semibold">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredSubmissions.map((submission) => (
-                      <TableRow key={submission.id}>
-                        <TableCell>{submission.name}</TableCell>
-                        <TableCell>{submission.call_up}</TableCell>
+                      <TableRow key={submission.id} className="hover:bg-muted/30">
+                        <TableCell className="font-medium">{submission.name}</TableCell>
+                        <TableCell className="font-mono text-sm">{submission.call_up}</TableCell>
                         <TableCell>{submission.course}</TableCell>
-                        <TableCell>{submission.nysc_email || '-'}</TableCell>
-                        <TableCell className="capitalize">
-                          {submission.service_type?.replace('_', ' ') || '-'}
+                        <TableCell className="text-sm">{submission.nysc_email || '-'}</TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {submission.nysc_password ? '••••••••' : '-'}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="capitalize">
+                          <Badge variant="outline" className="font-normal">
+                            {submission.service_type?.replace('_', ' ') || '-'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-semibold">
                           {submission.calculated_amount ? `₦${submission.calculated_amount.toLocaleString()}` : '-'}
                         </TableCell>
                         <TableCell>{submission.state_of_origin}</TableCell>
@@ -410,34 +468,92 @@ const AdminPanel = () => {
                               </Button>
                             </DialogTrigger>
                             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                              <DialogHeader>
-                                <DialogTitle>Update Submission - {submission.name}</DialogTitle>
-                                <DialogDescription className="sr-only">
-                                  Update NYSC submission status, payment verification, and admin notes.
+                              <DialogHeader className="pb-4 border-b">
+                                <DialogTitle className="text-xl">Update Submission - {submission.name}</DialogTitle>
+                                <DialogDescription>
+                                  Review and manage NYSC submission details, payment verification, and status updates.
                                 </DialogDescription>
                               </DialogHeader>
-                              <div className="space-y-4 py-4">
-                                <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Call Up Number</Label>
-                                    <p className="text-sm font-medium">{submission.call_up}</p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Course</Label>
-                                    <p className="text-sm font-medium">{submission.course}</p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">NYSC Email</Label>
-                                    <p className="text-sm font-medium">{submission.nysc_email || '-'}</p>
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs text-muted-foreground">Service Type</Label>
-                                    <p className="text-sm font-medium capitalize">{submission.service_type?.replace('_', ' ') || '-'}</p>
+                              <div className="space-y-6 py-4">
+                                {/* Personal Information Section */}
+                                <div className="space-y-3">
+                                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                    <span className="h-1 w-1 rounded-full bg-primary"></span>
+                                    Personal Information
+                                  </h3>
+                                  <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg border">
+                                    <div>
+                                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">Full Name</Label>
+                                      <p className="text-sm font-medium mt-1">{submission.name}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">Call Up Number</Label>
+                                      <p className="text-sm font-mono font-medium mt-1">{submission.call_up}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">Course of Study</Label>
+                                      <p className="text-sm font-medium mt-1">{submission.course}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">Service Type</Label>
+                                      <p className="text-sm font-medium capitalize mt-1">
+                                        <Badge variant="outline">{submission.service_type?.replace('_', ' ') || '-'}</Badge>
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">State of Origin</Label>
+                                      <p className="text-sm font-medium mt-1">{submission.state_of_origin}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">State of Choice</Label>
+                                      <p className="text-sm font-medium mt-1">{submission.state_of_choices}</p>
+                                    </div>
                                   </div>
                                 </div>
 
+                                {/* NYSC Credentials Section */}
+                                <div className="space-y-3">
+                                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                    <span className="h-1 w-1 rounded-full bg-primary"></span>
+                                    NYSC Portal Credentials
+                                  </h3>
+                                  <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg border">
+                                    <div>
+                                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">NYSC Email</Label>
+                                      <p className="text-sm font-medium mt-1 break-all">{submission.nysc_email || '-'}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">NYSC Password</Label>
+                                      <p className="text-sm font-mono mt-1">{submission.nysc_password || '-'}</p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Payment Information Section */}
+                                <div className="space-y-3">
+                                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                    <span className="h-1 w-1 rounded-full bg-primary"></span>
+                                    Payment Information
+                                  </h3>
+                                  <div className="p-4 bg-muted/50 rounded-lg border">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">Calculated Amount</Label>
+                                      <p className="text-lg font-bold text-primary">
+                                        {submission.calculated_amount ? `₦${submission.calculated_amount.toLocaleString()}` : '-'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Status Management Section */}
+                                <div className="space-y-3 pt-2 border-t">
+                                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                    <span className="h-1 w-1 rounded-full bg-primary"></span>
+                                    Status Management
+                                  </h3>
+                                  <div className="space-y-4">
                                 <div className="space-y-2">
-                                  <Label htmlFor="status">Status</Label>
+                                  <Label htmlFor="status">Application Status</Label>
                                   <Select value={status} onValueChange={setStatus}>
                                     <SelectTrigger>
                                       <SelectValue placeholder="Select status" />
@@ -451,52 +567,36 @@ const AdminPanel = () => {
                                   </Select>
                                 </div>
 
-                                <div className="space-y-2">
-                                  <Label htmlFor="payment">Payment Status</Label>
-                                  <Select 
-                                    value={paymentVerified ? "verified" : "pending"} 
-                                    onValueChange={(val) => setPaymentVerified(val === "verified")}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select payment status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="pending">Pending</SelectItem>
-                                      <SelectItem value="verified">Verified</SelectItem>
-                                    </SelectContent>
-                                  </Select>
+                                    <div className="space-y-2">
+                                      <Label htmlFor="payment">Payment Verification</Label>
+                                      <Select 
+                                        value={paymentVerified ? "verified" : "pending"} 
+                                        onValueChange={(val) => setPaymentVerified(val === "verified")}
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select payment status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="pending">Pending Verification</SelectItem>
+                                          <SelectItem value="verified">Verified</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                  <Label htmlFor="remarks">Remarks (visible to user)</Label>
-                                  <Textarea
-                                    id="remarks"
-                                    value={remarks}
-                                    onChange={(e) => setRemarks(e.target.value)}
-                                    placeholder="Enter remarks for the user..."
-                                    rows={3}
-                                  />
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label htmlFor="adminNotes">Admin Notes (internal only)</Label>
-                                  <Textarea
-                                    id="adminNotes"
-                                    value={adminNotes}
-                                    onChange={(e) => setAdminNotes(e.target.value)}
-                                    placeholder="Internal notes for admins..."
-                                    rows={3}
-                                  />
-                                </div>
-
+                                {/* Payment Proof Section */}
                                 {submission.payment_proof_url && (
-                                  <div className="space-y-2">
-                                    <Label>Payment Proof</Label>
-                                    <div className="border rounded-lg p-4 bg-muted">
+                                  <div className="space-y-3">
+                                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                      <span className="h-1 w-1 rounded-full bg-primary"></span>
+                                      Payment Proof
+                                    </h3>
+                                    <div className="border rounded-lg p-4 bg-background">
                                       <img 
                                         src={submission.payment_proof_url} 
                                         alt="Payment proof" 
-                                        className="max-w-full h-auto rounded-md"
+                                        className="max-w-full h-auto rounded-md shadow-sm"
                                         onError={(e) => {
                                           e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><text x="50%" y="50%" text-anchor="middle" dy=".3em">Unable to load image</text></svg>';
                                         }}
@@ -505,17 +605,56 @@ const AdminPanel = () => {
                                         href={submission.payment_proof_url} 
                                         target="_blank" 
                                         rel="noopener noreferrer"
-                                        className="text-sm text-primary hover:underline mt-2 inline-block"
+                                        className="text-sm text-primary hover:underline mt-3 inline-flex items-center gap-1"
                                       >
-                                        Open in new tab
+                                        Open in new tab →
                                       </a>
                                     </div>
                                   </div>
                                 )}
 
-                                <Button onClick={handleUpdateSubmission} className="w-full">
-                                  Update Submission
-                                </Button>
+                                {/* Notes Section */}
+                                <div className="space-y-3 pt-2 border-t">
+                                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                    <span className="h-1 w-1 rounded-full bg-primary"></span>
+                                    Notes & Remarks
+                                  </h3>
+                                  <div className="space-y-4">
+                                    <div className="space-y-2">
+                                      <Label htmlFor="remarks" className="text-sm font-medium">
+                                        User Remarks 
+                                        <span className="text-xs text-muted-foreground font-normal ml-1">(Visible to user)</span>
+                                      </Label>
+                                      <Textarea
+                                        id="remarks"
+                                        value={remarks}
+                                        onChange={(e) => setRemarks(e.target.value)}
+                                        placeholder="Enter remarks that will be visible to the user..."
+                                        rows={3}
+                                        className="resize-none"
+                                      />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <Label htmlFor="adminNotes" className="text-sm font-medium">
+                                        Internal Admin Notes 
+                                        <span className="text-xs text-muted-foreground font-normal ml-1">(Private - Admin only)</span>
+                                      </Label>
+                                      <Textarea
+                                        id="adminNotes"
+                                        value={adminNotes}
+                                        onChange={(e) => setAdminNotes(e.target.value)}
+                                        placeholder="Internal notes for admin reference only..."
+                                        rows={3}
+                                        className="resize-none"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                 <Button onClick={handleUpdateSubmission} className="w-full h-11 text-base font-medium">
+                                   Save Changes
+                                 </Button>
                               </div>
                             </DialogContent>
                           </Dialog>
@@ -532,9 +671,12 @@ const AdminPanel = () => {
 
           <TabsContent value="support">
             <Card>
-              <CardHeader className="p-4 md:p-6">
+              <CardHeader className="p-4 md:p-6 border-b">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <CardTitle className="text-lg md:text-xl">Support Messages</CardTitle>
+                  <div>
+                    <CardTitle className="text-lg md:text-xl mb-1">Support Messages</CardTitle>
+                    <p className="text-sm text-muted-foreground">Manage and respond to user support requests</p>
+                  </div>
                   <div className="relative w-full sm:w-64">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input
@@ -547,31 +689,35 @@ const AdminPanel = () => {
                 </div>
               </CardHeader>
               <CardContent className="p-0 md:p-6">
-                <ScrollArea className="w-full">
-                  <div className="min-w-[900px]">
+                <ScrollArea className="w-full h-[calc(100vh-350px)]">
+                  <div className="min-w-[1000px]">
                     <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Subject</TableHead>
-                      <TableHead>Message</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Response</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Actions</TableHead>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="font-semibold">Subject</TableHead>
+                      <TableHead className="font-semibold">Message Preview</TableHead>
+                      <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="font-semibold">Admin Response</TableHead>
+                      <TableHead className="font-semibold">Date Submitted</TableHead>
+                      <TableHead className="font-semibold">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredMessages.map((msg) => (
-                      <TableRow key={msg.id}>
+                      <TableRow key={msg.id} className="hover:bg-muted/30">
                         <TableCell className="font-medium">{msg.subject}</TableCell>
-                        <TableCell className="max-w-xs truncate">{msg.message}</TableCell>
+                        <TableCell className="max-w-xs">
+                          <p className="truncate text-sm text-muted-foreground">{msg.message}</p>
+                        </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(msg.status)}>
-                            {msg.status}
+                            {msg.status.replace('_', ' ')}
                           </Badge>
                         </TableCell>
-                        <TableCell className="max-w-xs truncate">
-                          {msg.admin_response || "-"}
+                        <TableCell className="max-w-xs">
+                          <p className="truncate text-sm text-muted-foreground">
+                            {msg.admin_response || "No response yet"}
+                          </p>
                         </TableCell>
                         <TableCell>
                           {new Date(msg.created_at).toLocaleDateString()}
@@ -584,51 +730,84 @@ const AdminPanel = () => {
                               </Button>
                             </DialogTrigger>
                             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                              <DialogHeader>
-                                <DialogTitle>Respond to Message</DialogTitle>
-                                <DialogDescription className="sr-only">
-                                  Review the user support message and add an admin response with updated status.
+                              <DialogHeader className="pb-4 border-b">
+                                <DialogTitle className="text-xl">Support Message Response</DialogTitle>
+                                <DialogDescription>
+                                  Review the user's support request and provide a detailed response.
                                 </DialogDescription>
                               </DialogHeader>
-                              <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                  <Label>Subject</Label>
-                                  <p className="text-sm font-semibold">{msg.subject}</p>
+                              <div className="space-y-6 py-4">
+                                {/* Message Information */}
+                                <div className="space-y-3">
+                                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                    <span className="h-1 w-1 rounded-full bg-primary"></span>
+                                    Message Details
+                                  </h3>
+                                  <div className="space-y-3 p-4 bg-muted/50 rounded-lg border">
+                                    <div>
+                                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">Subject</Label>
+                                      <p className="text-sm font-semibold mt-1">{msg.subject}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">User Message</Label>
+                                      <p className="text-sm p-3 bg-background rounded-md mt-1 whitespace-pre-wrap">{msg.message}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs text-muted-foreground uppercase tracking-wide">Submitted On</Label>
+                                      <p className="text-sm mt-1">
+                                        {new Date(msg.created_at).toLocaleDateString('en-US', { 
+                                          year: 'numeric', 
+                                          month: 'long', 
+                                          day: 'numeric',
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        })}
+                                      </p>
+                                    </div>
+                                  </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                  <Label>User Message</Label>
-                                  <p className="text-sm p-3 bg-muted rounded-md">{msg.message}</p>
+                                {/* Status Management */}
+                                <div className="space-y-3 pt-2 border-t">
+                                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                    <span className="h-1 w-1 rounded-full bg-primary"></span>
+                                    Status & Response
+                                  </h3>
+                                  <div className="space-y-4">
+                                    <div className="space-y-2">
+                                      <Label htmlFor="messageStatus">Message Status</Label>
+                                      <Select value={messageStatus} onValueChange={setMessageStatus}>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="open">Open - New Request</SelectItem>
+                                          <SelectItem value="in_progress">In Progress - Being Reviewed</SelectItem>
+                                          <SelectItem value="resolved">Resolved - Issue Fixed</SelectItem>
+                                          <SelectItem value="closed">Closed - No Further Action</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <Label htmlFor="messageResponse" className="text-sm font-medium">
+                                        Admin Response
+                                      </Label>
+                                      <Textarea
+                                        id="messageResponse"
+                                        value={messageResponse}
+                                        onChange={(e) => setMessageResponse(e.target.value)}
+                                        placeholder="Type your detailed response to the user's inquiry..."
+                                        rows={6}
+                                        className="resize-none"
+                                      />
+                                      <p className="text-xs text-muted-foreground">This response will be visible to the user</p>
+                                    </div>
+                                  </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                  <Label htmlFor="messageStatus">Status</Label>
-                                  <Select value={messageStatus} onValueChange={setMessageStatus}>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="open">Open</SelectItem>
-                                      <SelectItem value="in_progress">In Progress</SelectItem>
-                                      <SelectItem value="resolved">Resolved</SelectItem>
-                                      <SelectItem value="closed">Closed</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label htmlFor="messageResponse">Admin Response</Label>
-                                  <Textarea
-                                    id="messageResponse"
-                                    value={messageResponse}
-                                    onChange={(e) => setMessageResponse(e.target.value)}
-                                    placeholder="Type your response..."
-                                    rows={4}
-                                  />
-                                </div>
-
-                                <Button onClick={handleUpdateMessage} className="w-full">
-                                  Send Response
+                                <Button onClick={handleUpdateMessage} className="w-full h-11 text-base font-medium">
+                                  Send Response & Update Status
                                 </Button>
                               </div>
                             </DialogContent>
@@ -646,9 +825,12 @@ const AdminPanel = () => {
 
           <TabsContent value="users">
             <Card>
-              <CardHeader className="p-4 md:p-6">
+              <CardHeader className="p-4 md:p-6 border-b">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <CardTitle className="text-lg md:text-xl">Registered Users</CardTitle>
+                  <div>
+                    <CardTitle className="text-lg md:text-xl mb-1">Registered Users</CardTitle>
+                    <p className="text-sm text-muted-foreground">View and manage all registered users in the system</p>
+                  </div>
                   <div className="relative w-full sm:w-64">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input
@@ -661,29 +843,33 @@ const AdminPanel = () => {
                 </div>
               </CardHeader>
               <CardContent className="p-0 md:p-6">
-                <ScrollArea className="w-full h-[calc(100vh-300px)]">
-                  <div className="min-w-[800px]">
+                <ScrollArea className="w-full h-[calc(100vh-350px)]">
+                  <div className="min-w-[900px]">
                     <Table>
                       <TableHeader>
-                        <TableRow>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Full Name</TableHead>
-                          <TableHead>Role</TableHead>
-                          <TableHead>Registration Date</TableHead>
+                        <TableRow className="bg-muted/50">
+                          <TableHead className="font-semibold">Email Address</TableHead>
+                          <TableHead className="font-semibold">Full Name</TableHead>
+                          <TableHead className="font-semibold">Role</TableHead>
+                          <TableHead className="font-semibold">Registration Date</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filteredUsers.map((user) => (
-                          <TableRow key={user.id}>
+                          <TableRow key={user.id} className="hover:bg-muted/30">
                             <TableCell className="font-medium">{user.email || '-'}</TableCell>
-                            <TableCell>{user.full_name || '-'}</TableCell>
+                            <TableCell>{user.full_name || 'Not provided'}</TableCell>
                             <TableCell>
-                              <Badge className={user.role === 'admin' ? 'bg-purple-500' : 'bg-blue-500'}>
+                              <Badge className={user.role === 'admin' ? 'bg-purple-500 hover:bg-purple-600' : 'bg-blue-500 hover:bg-blue-600'}>
                                 {user.role}
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              {new Date(user.created_at).toLocaleDateString()}
+                              {new Date(user.created_at).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })}
                             </TableCell>
                           </TableRow>
                         ))}
