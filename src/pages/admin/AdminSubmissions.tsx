@@ -17,6 +17,13 @@ import { exportToCSV, exportToExcel } from "@/utils/exportData";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useActivityLog } from "@/hooks/useActivityLog";
+import { z } from "zod";
+
+const submissionUpdateSchema = z.object({
+  status: z.enum(["pending", "in_progress", "completed", "rejected"], { required_error: "Status is required" }),
+  remarks: z.string().max(500, "Remarks must be less than 500 characters").optional(),
+  admin_notes: z.string().max(1000, "Admin notes must be less than 1000 characters").optional(),
+});
 
 interface Submission {
   id: string;
@@ -78,6 +85,20 @@ export default function AdminSubmissions() {
   const handleUpdateSubmission = async () => {
     if (!selectedSubmission) return;
 
+    // Validate input
+    try {
+      submissionUpdateSchema.parse({ 
+        status, 
+        remarks: remarks || undefined,
+        admin_notes: adminNotes || undefined,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
+    }
+
     const oldStatus = selectedSubmission.status;
     const oldPaymentStatus = selectedSubmission.payment_verified;
 
@@ -87,8 +108,8 @@ export default function AdminSubmissions() {
         .update({
           status,
           payment_verified: paymentVerified,
-          remarks,
-          admin_notes: adminNotes,
+          remarks: remarks?.trim() || null,
+          admin_notes: adminNotes?.trim() || null,
         })
         .eq("id", selectedSubmission.id);
 

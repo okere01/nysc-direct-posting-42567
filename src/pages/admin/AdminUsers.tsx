@@ -12,6 +12,12 @@ import { Label } from "@/components/ui/label";
 import { Search, Download, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { exportToCSV, exportToExcel } from "@/utils/exportData";
+import { z } from "zod";
+
+const messageSchema = z.object({
+  subject: z.string().trim().min(3, "Subject must be at least 3 characters").max(200, "Subject must be less than 200 characters"),
+  message: z.string().trim().min(10, "Message must be at least 10 characters").max(2000, "Message must be less than 2000 characters"),
+});
 
 interface UserProfile {
   id: string;
@@ -90,16 +96,26 @@ export default function AdminUsers() {
   };
 
   const handleSendMessage = async () => {
-    if (!selectedUser || !messageSubject || !messageContent) {
-      toast.error("Please fill all fields");
+    if (!selectedUser) {
+      toast.error("No user selected");
       return;
+    }
+
+    // Validate input
+    try {
+      messageSchema.parse({ subject: messageSubject, message: messageContent });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
     }
 
     try {
       const { error } = await supabase.from("support_messages").insert({
         user_id: selectedUser.id,
-        subject: messageSubject,
-        message: messageContent,
+        subject: messageSubject.trim(),
+        message: messageContent.trim(),
         status: "open",
       });
 
