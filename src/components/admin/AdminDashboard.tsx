@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, MessageSquare, Users, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { FileText, MessageSquare, Users, CheckCircle, Clock, AlertCircle, Bell } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ActivityLog } from "@/components/admin/ActivityLog";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -64,6 +66,7 @@ export default function AdminDashboard() {
       icon: Clock,
       description: "Awaiting review",
       color: "text-yellow-600",
+      urgent: stats.pendingSubmissions > 0,
     },
     {
       title: "Support Messages",
@@ -78,6 +81,7 @@ export default function AdminDashboard() {
       icon: AlertCircle,
       description: "Needs response",
       color: "text-orange-600",
+      urgent: stats.openMessages > 0,
     },
     {
       title: "Registered Users",
@@ -88,21 +92,63 @@ export default function AdminDashboard() {
     },
   ];
 
+  const hasUnattendedRequests = stats.pendingSubmissions > 0 || stats.openMessages > 0;
+
   return (
     <ScrollArea className="h-screen">
       <div className="p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            Overview of your NYSC management system
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+              <p className="text-muted-foreground mt-2">
+                Overview of your NYSC management system
+              </p>
+            </div>
+            {hasUnattendedRequests && (
+              <Badge variant="destructive" className="px-4 py-2 text-sm flex items-center gap-2 animate-pulse">
+                <Bell className="h-4 w-4" />
+                {stats.pendingSubmissions + stats.openMessages} Unattended
+              </Badge>
+            )}
+          </div>
         </div>
+
+        {hasUnattendedRequests && (
+          <Alert variant="destructive" className="mb-6 border-red-500/50 bg-red-500/10">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Attention Required</AlertTitle>
+            <AlertDescription className="flex flex-col gap-1">
+              {stats.pendingSubmissions > 0 && (
+                <span>• {stats.pendingSubmissions} pending submission{stats.pendingSubmissions > 1 ? 's' : ''} awaiting review</span>
+              )}
+              {stats.openMessages > 0 && (
+                <span>• {stats.openMessages} open support message{stats.openMessages > 1 ? 's' : ''} need response</span>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {statCards.map((stat) => {
             const Icon = stat.icon;
+            const isUrgent = 'urgent' in stat && stat.urgent;
             return (
-              <Card key={stat.title} className="hover:shadow-lg transition-shadow">
+              <Card 
+                key={stat.title} 
+                className={`hover:shadow-lg transition-shadow ${
+                  isUrgent ? 'border-red-500 border-2 bg-red-500/5 relative' : ''
+                }`}
+              >
+                {isUrgent && (
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute -top-2 -right-2 animate-pulse"
+                  >
+                    <Bell className="h-3 w-3 mr-1" />
+                    Action Needed
+                  </Badge>
+                )}
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     {stat.title}
