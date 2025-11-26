@@ -4,12 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { SubmissionForm } from "@/components/SubmissionForm";
 import { PricingTable } from "@/components/PricingTable";
-import { Shield, CheckCircle, Clock } from "lucide-react";
+import { Shield, CheckCircle, Clock, Bell } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { useUserNotifications } from "@/hooks/useUserNotifications";
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
+  const { notifications } = useUserNotifications();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -54,19 +57,53 @@ const Index = () => {
                     onClick={() => navigate("/support")} 
                     variant="ghost"
                     size="sm"
-                    className="hidden md:flex"
+                    className="hidden md:flex relative"
                   >
                     Support
+                    {notifications.unreadMessages > 0 && (
+                      <Badge 
+                        variant="destructive" 
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse"
+                      >
+                        {notifications.unreadMessages}
+                      </Badge>
+                    )}
                   </Button>
                   <Button 
                     onClick={() => navigate("/submissions")} 
                     variant="outline"
                     size="sm"
-                    className="text-xs sm:text-sm"
+                    className="text-xs sm:text-sm relative"
                   >
                     <span className="hidden sm:inline">Submissions</span>
                     <span className="sm:hidden">📋</span>
+                    {(notifications.pendingSubmissions > 0 || notifications.unverifiedPayments > 0) && (
+                      <Badge 
+                        variant="destructive" 
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse"
+                      >
+                        {notifications.pendingSubmissions + notifications.unverifiedPayments}
+                      </Badge>
+                    )}
                   </Button>
+                  {notifications.totalAlerts > 0 && (
+                    <div className="md:hidden">
+                      <Button 
+                        onClick={() => navigate("/support")} 
+                        variant="ghost"
+                        size="sm"
+                        className="relative"
+                      >
+                        <Bell className="h-4 w-4" />
+                        <Badge 
+                          variant="destructive" 
+                          className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse"
+                        >
+                          {notifications.totalAlerts}
+                        </Badge>
+                      </Button>
+                    </div>
+                  )}
                   <Button 
                     onClick={handleLogout} 
                     variant="ghost"
