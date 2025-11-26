@@ -9,10 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { Search, Download, X } from "lucide-react";
+import { Search, Download, X, CheckCircle, XCircle, ShieldCheck, Send } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { exportToCSV, exportToExcel } from "@/utils/exportData";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Submission {
   id: string;
@@ -44,6 +46,10 @@ export default function AdminSubmissions() {
   const [status, setStatus] = useState("");
   const [paymentVerified, setPaymentVerified] = useState(false);
   const [showDetailPanel, setShowDetailPanel] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showMessageDialog, setShowMessageDialog] = useState(false);
+  const [messageSubject, setMessageSubject] = useState("");
+  const [messageContent, setMessageContent] = useState("");
 
   useEffect(() => {
     fetchSubmissions();
@@ -99,6 +105,82 @@ export default function AdminSubmissions() {
     setRemarks(submission.remarks || "");
     setAdminNotes(submission.admin_notes || "");
     setShowDetailPanel(true);
+  };
+
+  const handleToggleSelection = (id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleToggleAll = () => {
+    if (selectedIds.length === filteredSubmissions.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredSubmissions.map(s => s.id));
+    }
+  };
+
+  const handleBulkAction = async (action: 'approve' | 'reject' | 'verify') => {
+    if (selectedIds.length === 0) {
+      toast.error("Please select at least one submission");
+      return;
+    }
+
+    try {
+      const updates: any = {};
+      
+      if (action === 'approve') {
+        updates.status = 'approved';
+      } else if (action === 'reject') {
+        updates.status = 'rejected';
+      } else if (action === 'verify') {
+        updates.payment_verified = true;
+      }
+
+      const { error } = await supabase
+        .from("submissions")
+        .update(updates)
+        .in("id", selectedIds);
+
+      if (error) throw error;
+
+      toast.success(`Successfully updated ${selectedIds.length} submission(s)`);
+      fetchSubmissions();
+      setSelectedIds([]);
+    } catch (error) {
+      console.error("Error updating submissions:", error);
+      toast.error("Failed to update submissions");
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!selectedSubmission || !messageSubject.trim() || !messageContent.trim()) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("support_messages")
+        .insert({
+          user_id: selectedSubmission.user_id,
+          subject: messageSubject.trim(),
+          message: `[Admin Message]\n\n${messageContent.trim()}`,
+          status: "closed",
+          admin_response: "This is an admin-initiated message.",
+        });
+
+      if (error) throw error;
+
+      toast.success("Message sent to user");
+      setShowMessageDialog(false);
+      setMessageSubject("");
+      setMessageContent("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("Failed to send message");
+    }
   };
 
   const handleExportCSV = () => {
@@ -157,8 +239,8 @@ export default function AdminSubmissions() {
     <div className="h-screen flex">
       {/* Submissions List */}
       <div className={cn("flex-1 flex flex-col", showDetailPanel && "border-r")}>
-        <div className="p-8 border-b">
-          <div className="flex justify-between items-center mb-6">
+        <div className="p-8 border-b space-y-4">
+          <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold">NYSC Submissions</h1>
               <p className="text-muted-foreground mt-1">
@@ -176,6 +258,48 @@ export default function AdminSubmissions() {
               </Button>
             </div>
           </div>
+
+          {selectedIds.length > 0 && (
+            <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg border border-primary/20">
+              <span className="text-sm font-medium">{selectedIds.length} selected</span>
+              <div className="flex gap-2 ml-auto">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleBulkAction('approve')}
+                  className="gap-2"
+                >
+                  <CheckCircle className="h-4 w-4" />
+                  Approve
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleBulkAction('reject')}
+                  className="gap-2"
+                >
+                  <XCircle className="h-4 w-4" />
+                  Reject
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleBulkAction('verify')}
+                  className="gap-2"
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  Verify Payment
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="ghost"
+                  onClick={() => setSelectedIds([])}
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center gap-4">
             <div className="flex-1 relative">
@@ -199,9 +323,14 @@ export default function AdminSubmissions() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={selectedIds.length === filteredSubmissions.length && filteredSubmissions.length > 0}
+                        onCheckedChange={handleToggleAll}
+                      />
+                    </TableHead>
                     <TableHead className="font-semibold">Name</TableHead>
                     <TableHead className="font-semibold">Course</TableHead>
-                    <TableHead className="font-semibold">Call Up</TableHead>
                     <TableHead className="font-semibold">Status</TableHead>
                     <TableHead className="font-semibold">Payment</TableHead>
                     <TableHead className="font-semibold">Amount</TableHead>
@@ -212,25 +341,50 @@ export default function AdminSubmissions() {
                     <TableRow 
                       key={submission.id} 
                       className={cn(
-                        "cursor-pointer hover:bg-muted/30",
+                        "hover:bg-muted/30",
                         selectedSubmission?.id === submission.id && "bg-muted/50"
                       )}
-                      onClick={() => handleSelectSubmission(submission)}
                     >
-                      <TableCell className="font-medium">{submission.name}</TableCell>
-                      <TableCell>{submission.course}</TableCell>
-                      <TableCell>{submission.call_up}</TableCell>
-                      <TableCell>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={selectedIds.includes(submission.id)}
+                          onCheckedChange={() => handleToggleSelection(submission.id)}
+                        />
+                      </TableCell>
+                      <TableCell 
+                        className="font-medium cursor-pointer"
+                        onClick={() => handleSelectSubmission(submission)}
+                      >
+                        {submission.name}
+                      </TableCell>
+                      <TableCell 
+                        className="cursor-pointer"
+                        onClick={() => handleSelectSubmission(submission)}
+                      >
+                        {submission.course}
+                      </TableCell>
+                      <TableCell 
+                        className="cursor-pointer"
+                        onClick={() => handleSelectSubmission(submission)}
+                      >
                         <Badge variant={submission.status === "approved" ? "default" : "secondary"}>
                           {submission.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell 
+                        className="cursor-pointer"
+                        onClick={() => handleSelectSubmission(submission)}
+                      >
                         <Badge variant={submission.payment_verified ? "default" : "destructive"}>
                           {submission.payment_verified ? "Verified" : "Pending"}
                         </Badge>
                       </TableCell>
-                      <TableCell>₦{submission.calculated_amount?.toLocaleString() || "0"}</TableCell>
+                      <TableCell 
+                        className="cursor-pointer"
+                        onClick={() => handleSelectSubmission(submission)}
+                      >
+                        ₦{submission.calculated_amount?.toLocaleString() || "0"}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -384,13 +538,65 @@ export default function AdminSubmissions() {
             </div>
           </ScrollArea>
 
-          <div className="p-6 border-t">
+          <div className="p-6 border-t space-y-2">
             <Button onClick={handleUpdateSubmission} className="w-full">
               Update Submission
+            </Button>
+            <Button 
+              onClick={() => setShowMessageDialog(true)} 
+              variant="outline" 
+              className="w-full gap-2"
+            >
+              <Send className="h-4 w-4" />
+              Send Message to User
             </Button>
           </div>
         </div>
       )}
+
+      {/* Message Dialog */}
+      <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Send Message to User</DialogTitle>
+            <DialogDescription>
+              Send a direct message to {selectedSubmission?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="message-subject">Subject</Label>
+              <Input
+                id="message-subject"
+                placeholder="Message subject"
+                value={messageSubject}
+                onChange={(e) => setMessageSubject(e.target.value)}
+                maxLength={200}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="message-content">Message</Label>
+              <Textarea
+                id="message-content"
+                placeholder="Type your message here..."
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                rows={6}
+                maxLength={1000}
+              />
+              <p className="text-xs text-muted-foreground">
+                {messageContent.length}/1000 characters
+              </p>
+            </div>
+
+            <Button onClick={handleSendMessage} className="w-full">
+              Send Message
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
