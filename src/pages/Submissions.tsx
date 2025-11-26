@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, AlertCircle, Bell } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface Submission {
   id: string;
@@ -84,6 +85,10 @@ const Submissions = () => {
     }
   };
 
+  const pendingSubmissions = submissions.filter(s => s.status === "pending");
+  const unverifiedPayments = submissions.filter(s => !s.payment_verified);
+  const hasNewRemarks = submissions.filter(s => s.remarks && s.remarks.trim() !== "");
+
   const filteredSubmissions = submissions.filter(sub =>
     sub.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     sub.course.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -98,11 +103,21 @@ const Submissions = () => {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
+  const hasActionRequired = pendingSubmissions.length > 0 || unverifiedPayments.length > 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground">My Submissions</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-4xl font-bold text-foreground">My Submissions</h1>
+            {hasActionRequired && (
+              <Badge variant="destructive" className="animate-pulse">
+                <Bell className="h-3 w-3 mr-1" />
+                Action Required
+              </Badge>
+            )}
+          </div>
           <div className="space-x-4">
             <Button onClick={() => navigate("/support")} variant="outline">
               Contact Support
@@ -115,6 +130,31 @@ const Submissions = () => {
             </Button>
           </div>
         </div>
+
+        {hasActionRequired && (
+          <Alert className="mb-6 border-yellow-500/50 bg-yellow-500/10">
+            <AlertCircle className="h-4 w-4 text-yellow-600" />
+            <AlertTitle className="text-yellow-600">Pending Actions</AlertTitle>
+            <AlertDescription className="flex flex-col gap-1 text-yellow-600">
+              {pendingSubmissions.length > 0 && (
+                <span>• {pendingSubmissions.length} submission{pendingSubmissions.length > 1 ? 's' : ''} pending review</span>
+              )}
+              {unverifiedPayments.length > 0 && (
+                <span>• {unverifiedPayments.length} payment{unverifiedPayments.length > 1 ? 's' : ''} awaiting verification</span>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {hasNewRemarks.length > 0 && (
+          <Alert className="mb-6 border-blue-500/50 bg-blue-500/10">
+            <Bell className="h-4 w-4 text-blue-600" />
+            <AlertTitle className="text-blue-600">New Updates</AlertTitle>
+            <AlertDescription className="text-blue-600">
+              You have {hasNewRemarks.length} submission{hasNewRemarks.length > 1 ? 's' : ''} with admin remarks. Check the remarks column below.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {submissions.length === 0 ? (
           <Card>
