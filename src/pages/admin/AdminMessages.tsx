@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { exportToCSV, exportToExcel } from "@/utils/exportData";
 import { cn } from "@/lib/utils";
 import { useActivityLog } from "@/hooks/useActivityLog";
+import { z } from "zod";
 
 interface SupportMessage {
   id: string;
@@ -25,7 +26,14 @@ interface SupportMessage {
   admin_response: string | null;
   created_at: string;
   updated_at: string;
+  user_email?: string;
+  user_name?: string;
 }
+
+const responseSchema = z.object({
+  response: z.string().trim().min(10, "Response must be at least 10 characters").max(2000, "Response must be less than 2000 characters"),
+  status: z.enum(["open", "closed"], { required_error: "Status is required" }),
+});
 
 export default function AdminMessages() {
   const [messages, setMessages] = useState<SupportMessage[]>([]);
@@ -45,11 +53,24 @@ export default function AdminMessages() {
     try {
       const { data, error } = await supabase
         .from("support_messages")
-        .select("*")
+        .select(`
+          *,
+          profiles:user_id (
+            email,
+            full_name
+          )
+        `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setMessages(data || []);
+      
+      const messagesWithUserInfo = (data || []).map((msg: any) => ({
+        ...msg,
+        user_email: msg.profiles?.email,
+        user_name: msg.profiles?.full_name,
+      }));
+      
+      setMessages(messagesWithUserInfo);
     } catch (error) {
       console.error("Error fetching messages:", error);
       toast.error("Failed to load messages");
@@ -61,10 +82,21 @@ export default function AdminMessages() {
   const handleRespondToMessage = async () => {
     if (!selectedMessage) return;
 
+    // Validate input
+    try {
+      responseSchema.parse({ response, status });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
+    }
+
     const oldStatus = selectedMessage.status;
 
     try {
-      const { error } = await supabase
+      // Update database
+      const { error: updateError } = await supabase
         .from("support_messages")
         .update({
           admin_response: response,
@@ -72,7 +104,32 @@ export default function AdminMessages() {
         })
         .eq("id", selectedMessage.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      // Send email notification
+      if (selectedMessage.user_email) {
+        try {
+          const { error: emailError } = await supabase.functions.invoke('send-notification-email', {
+            body: {
+              to: selectedMessage.user_email,
+              subject: "Response to Your Support Request",
+              messageSubject: selectedMessage.subject,
+              userMessage: selectedMessage.message,
+              adminResponse: response,
+              userName: selectedMessage.user_name,
+            },
+          });
+
+          if (emailError) {
+            console.error("Email notification error:", emailError);
+            // Don't fail the whole operation if email fails
+            toast.warning("Response saved but email notification failed");
+          }
+        } catch (emailError) {
+          console.error("Email notification error:", emailError);
+          toast.warning("Response saved but email notification failed");
+        }
+      }
 
       // Log activity
       await logActivity({
@@ -82,10 +139,12 @@ export default function AdminMessages() {
         details: `Responded to message: "${selectedMessage.subject}" (status: ${oldStatus} → ${status})`,
       });
 
-      toast.success("Response sent successfully");
+      toast.success("Response sent successfully with email notification");
       fetchMessages();
       setShowDetailPanel(false);
       setSelectedMessage(null);
+      setResponse("");
+      setStatus("");
     } catch (error) {
       console.error("Error responding to message:", error);
       toast.error("Failed to send response");
