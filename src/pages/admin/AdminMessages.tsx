@@ -51,23 +51,33 @@ export default function AdminMessages() {
 
   const fetchMessages = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch messages
+      const { data: messagesData, error: messagesError } = await supabase
         .from("support_messages")
-        .select(`
-          *,
-          profiles:user_id (
-            email,
-            full_name
-          )
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      
-      const messagesWithUserInfo = (data || []).map((msg: any) => ({
+      if (messagesError) throw messagesError;
+
+      // Fetch all user profiles
+      const userIds = [...new Set(messagesData?.map(msg => msg.user_id) || [])];
+      const { data: profilesData, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, email, full_name")
+        .in("id", userIds);
+
+      if (profilesError) throw profilesError;
+
+      // Create a map of user profiles
+      const profilesMap = new Map(
+        profilesData?.map(profile => [profile.id, profile]) || []
+      );
+
+      // Join messages with user info
+      const messagesWithUserInfo = (messagesData || []).map(msg => ({
         ...msg,
-        user_email: msg.profiles?.email,
-        user_name: msg.profiles?.full_name,
+        user_email: profilesMap.get(msg.user_id)?.email || "Unknown",
+        user_name: profilesMap.get(msg.user_id)?.full_name || "Unknown User",
       }));
       
       setMessages(messagesWithUserInfo);
