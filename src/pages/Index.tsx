@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { SubmissionForm } from "@/components/SubmissionForm";
 import { PricingTable } from "@/components/PricingTable";
-import { Shield, CheckCircle, Clock, Bell } from "lucide-react";
+import { Shield, CheckCircle, Clock, Bell, HelpCircle, Settings } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useUserNotifications } from "@/hooks/useUserNotifications";
@@ -93,6 +93,24 @@ const Index = () => {
                     className="text-xs sm:text-sm hidden md:inline-flex"
                   >
                     Dashboard
+                  </Button>
+                  <Button 
+                    onClick={() => navigate("/help")} 
+                    variant="ghost"
+                    size="sm"
+                    className="hidden lg:inline-flex"
+                    title="Help Center"
+                  >
+                    <HelpCircle className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    onClick={() => navigate("/notification-preferences")} 
+                    variant="ghost"
+                    size="sm"
+                    className="hidden lg:inline-flex"
+                    title="Notification Preferences"
+                  >
+                    <Settings className="h-4 w-4" />
                   </Button>
                   {notifications.totalAlerts > 0 && (
                     <div className="md:hidden">

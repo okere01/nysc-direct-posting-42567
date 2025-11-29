@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LayoutDashboard, FileText, MessageSquare, Users, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, FileText, MessageSquare, Users, LogOut, ChevronLeft, ChevronRight, HelpCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import AIChat from "@/components/AIChat";
 
 export default function AdminLayout() {
   const location = useLocation();
@@ -57,6 +58,7 @@ export default function AdminLayout() {
     { path: "/admin/submissions", label: "Submissions", icon: FileText },
     { path: "/admin/messages", label: "Messages", icon: MessageSquare },
     { path: "/admin/users", label: "Users", icon: Users },
+    { path: "/help", label: "Help Center", icon: HelpCircle },
   ];
 
   return (
@@ -134,6 +136,7 @@ export default function AdminLayout() {
       <main className="flex-1 overflow-hidden">
         <Outlet />
       </main>
+      <AIChat type="admin" />
     </div>
   );
 }
