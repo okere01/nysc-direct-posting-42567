@@ -16,15 +16,24 @@ const Index = () => {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
+      if (session) {
+        // Redirect authenticated users to dashboard
+        navigate("/dashboard");
+      } else {
+        setIsAuthenticated(false);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
+      if (session) {
+        navigate("/dashboard");
+      } else {
+        setIsAuthenticated(false);
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
