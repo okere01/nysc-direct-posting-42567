@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const authSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -20,14 +21,17 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAdmin, loading: roleLoading } = useUserRole();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/");
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && !roleLoading) {
+        navigate(isAdmin ? "/admin" : "/dashboard");
       }
-    });
-  }, [navigate]);
+    };
+    checkAuth();
+  }, [navigate, isAdmin, roleLoading]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,11 +48,19 @@ const Auth = () => {
         
         if (error) throw error;
         
+        // Check user role after login
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("role", "admin")
+          .maybeSingle();
+        
         toast({
           title: "Welcome back!",
           description: "You've successfully logged in.",
         });
-        navigate("/");
+        
+        navigate(roleData ? "/admin" : "/dashboard");
       } else {
         const { error } = await supabase.auth.signUp({
           email,
