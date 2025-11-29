@@ -9,6 +9,8 @@ import Submissions from "./pages/Submissions";
 import AdminSetup from "./pages/AdminSetup";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
+import Dashboard from "./pages/Dashboard";
+import NotificationHistory from "./pages/NotificationHistory";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminSubmissions from "./pages/admin/AdminSubmissions";
@@ -27,6 +29,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/submissions" element={<Submissions />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/notification-history" element={<NotificationHistory />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="submissions" element={<AdminSubmissions />} />

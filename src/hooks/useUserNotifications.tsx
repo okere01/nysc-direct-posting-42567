@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { playNotificationSound, requestNotificationPermission, showBrowserNotification } from "@/utils/notificationSound";
 
 export function useUserNotifications() {
   const [notifications, setNotifications] = useState({
@@ -9,9 +10,18 @@ export function useUserNotifications() {
     totalAlerts: 0,
   });
   const [loading, setLoading] = useState(true);
+  const previousUnreadMessages = useRef(0);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(
+    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+  );
 
   useEffect(() => {
     fetchNotifications();
+    
+    // Check notification permission
+    if (typeof Notification !== 'undefined') {
+      setNotificationPermission(Notification.permission);
+    }
     
     // Set up real-time subscriptions
     const submissionsChannel = supabase
@@ -72,6 +82,32 @@ export function useUserNotifications() {
 
       const totalAlerts = pendingSubmissions + unverifiedPayments + unreadMessages;
 
+      // Check if there are new unread messages and trigger notifications
+      if (unreadMessages > previousUnreadMessages.current && previousUnreadMessages.current !== 0) {
+        playNotificationSound();
+        
+        // Show browser notification if permission granted
+        if (Notification.permission === 'granted') {
+          showBrowserNotification(
+            'New Admin Response',
+            'You have received a new response from the admin',
+          );
+        }
+        
+        // Log to notification history
+        if (user) {
+          await supabase.rpc('log_notification', {
+            p_user_id: user.id,
+            p_type: 'admin_response',
+            p_title: 'New Admin Response',
+            p_message: 'You have received a new response from the admin',
+            p_metadata: { unread_count: unreadMessages }
+          });
+        }
+      }
+      
+      previousUnreadMessages.current = unreadMessages;
+
       setNotifications({
         pendingSubmissions,
         unverifiedPayments,
@@ -85,5 +121,19 @@ export function useUserNotifications() {
     }
   };
 
-  return { notifications, loading, refetch: fetchNotifications };
+  const requestPermission = async () => {
+    const granted = await requestNotificationPermission();
+    if (typeof Notification !== 'undefined') {
+      setNotificationPermission(Notification.permission);
+    }
+    return granted;
+  };
+
+  return { 
+    notifications, 
+    loading, 
+    refetch: fetchNotifications,
+    notificationPermission,
+    requestPermission
+  };
 }
