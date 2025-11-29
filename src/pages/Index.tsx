@@ -86,6 +86,14 @@ const Index = () => {
                       </Badge>
                     )}
                   </Button>
+                  <Button 
+                    onClick={() => navigate("/dashboard")} 
+                    variant="outline"
+                    size="sm"
+                    className="text-xs sm:text-sm hidden md:inline-flex"
+                  >
+                    Dashboard
+                  </Button>
                   {notifications.totalAlerts > 0 && (
                     <div className="md:hidden">
                       <Button 
