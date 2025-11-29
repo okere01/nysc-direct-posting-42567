@@ -41,17 +41,18 @@ const Auth = () => {
       setLoading(true);
 
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { error, data } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         
         if (error) throw error;
         
-        // Check user role after login
+        // Check if logged-in user is admin
         const { data: roleData } = await supabase
           .from("user_roles")
           .select("role")
+          .eq("user_id", data.user.id)
           .eq("role", "admin")
           .maybeSingle();
         
@@ -60,6 +61,7 @@ const Auth = () => {
           description: "You've successfully logged in.",
         });
         
+        // Redirect based on role
         navigate(roleData ? "/admin" : "/dashboard");
       } else {
         const { error } = await supabase.auth.signUp({
