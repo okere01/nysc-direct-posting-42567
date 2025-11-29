@@ -16,6 +16,9 @@ import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminSubmissions from "./pages/admin/AdminSubmissions";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminUsers from "./pages/admin/AdminUsers";
+import HelpCenter from "./pages/HelpCenter";
+import NotificationPreferences from "./pages/NotificationPreferences";
+import AIChat from "./components/AIChat";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +34,8 @@ const App = () => (
           <Route path="/submissions" element={<Submissions />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/notification-history" element={<NotificationHistory />} />
+          <Route path="/help" element={<HelpCenter />} />
+          <Route path="/notification-preferences" element={<NotificationPreferences />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="submissions" element={<AdminSubmissions />} />
@@ -42,6 +47,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <AIChat type="general" />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
